@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Left Column: Quick Logging -->
+    <div class="col-md-7">
+        <!-- Manual Logging -->
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-4">快速紀錄 (份數)</h4>
+                
+                <!-- Protein -->
+                <div class="d-flex align-items-center justify-content-between mb-3 p-3 bg-light rounded-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-danger bg-opacity-10 text-danger rounded-circle me-3">🥩</div>
+                        <span class="fs-5 fw-medium">蛋白質</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-outline-danger rounded-circle btn-sm qty-btn" onclick="updateQty('protein', -1)">-</button>
+                        <span id="protein-qty" class="fs-4 fw-bold mx-2 w-30px text-center">0</span>
+                        <button class="btn btn-danger rounded-circle btn-sm qty-btn" onclick="updateQty('protein', 1)">+</button>
+                    </div>
+                </div>
+
+                <!-- Carbs -->
+                <div class="d-flex align-items-center justify-content-between mb-3 p-3 bg-light rounded-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-warning bg-opacity-10 text-warning rounded-circle me-3">🍚</div>
+                        <span class="fs-5 fw-medium">澱粉</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-outline-warning rounded-circle btn-sm qty-btn" onclick="updateQty('carb', -1)">-</button>
+                        <span id="carb-qty" class="fs-4 fw-bold mx-2 w-30px text-center">0</span>
+                        <button class="btn btn-warning rounded-circle btn-sm qty-btn text-white" onclick="updateQty('carb', 1)">+</button>
+                    </div>
+                </div>
+
+                <!-- Veggies -->
+                <div class="d-flex align-items-center justify-content-between mb-4 p-3 bg-light rounded-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-success bg-opacity-10 text-success rounded-circle me-3">🥦</div>
+                        <span class="fs-5 fw-medium">蔬果</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-outline-success rounded-circle btn-sm qty-btn" onclick="updateQty('veg', -1)">-</button>
+                        <span id="veg-qty" class="fs-4 fw-bold mx-2 w-30px text-center">0</span>
+                        <button class="btn btn-success rounded-circle btn-sm qty-btn" onclick="updateQty('veg', 1)">+</button>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm" onclick="submitManualRecord()">
+                    送出紀錄
+                </button>
+            </div>
+        </div>
+
+        <!-- Prototype Food Shortcuts -->
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-4">原型食物快捷鍵</h4>
+                <div class="row g-3">
+                    <div class="col-4">
+                        <button class="btn btn-outline-primary w-100 h-100 p-3 rounded-4 d-flex flex-column align-items-center justify-content-center food-btn" onclick="addPrototypeFood('雞胸肉', 2, 0, 0)">
+                            <span class="fs-1 mb-2">🍗</span>
+                            <span class="fw-bold">雞胸肉</span>
+                            <small class="text-muted text-nowrap mt-1">2份蛋白質</small>
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-outline-warning w-100 h-100 p-3 rounded-4 d-flex flex-column align-items-center justify-content-center food-btn" onclick="addPrototypeFood('地瓜', 0, 2, 0)">
+                            <span class="fs-1 mb-2">🍠</span>
+                            <span class="fw-bold">地瓜</span>
+                            <small class="text-muted text-nowrap mt-1">2份澱粉</small>
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-outline-info w-100 h-100 p-3 rounded-4 d-flex flex-column align-items-center justify-content-center food-btn" onclick="addPrototypeFood('無糖豆漿', 1, 0, 0)">
+                            <span class="fs-1 mb-2">🥛</span>
+                            <span class="fw-bold">無糖豆漿</span>
+                            <small class="text-muted text-nowrap mt-1">1份蛋白質</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Dashboard -->
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0 rounded-4 h-100 bg-gradient-primary text-white">
+            <div class="card-body p-4 d-flex flex-column">
+                <h4 class="fw-bold mb-4">今日營養儀表板</h4>
+                <div class="chart-container flex-grow-1 position-relative d-flex align-items-center justify-content-center min-h-250px">
+                    <canvas id="nutritionChart"></canvas>
+                </div>
+                <div class="mt-4 row text-center">
+                    <div class="col-4">
+                        <h3 class="fw-bold mb-0" id="total-protein">0</h3>
+                        <small class="opacity-75">蛋白質</small>
+                    </div>
+                    <div class="col-4 border-start border-end border-light border-opacity-25">
+                        <h3 class="fw-bold mb-0" id="total-carb">0</h3>
+                        <small class="opacity-75">澱粉</small>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="fw-bold mb-0" id="total-veg">0</h3>
+                        <small class="opacity-75">蔬果</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast for notifications -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast align-items-center text-white bg-success border-0 rounded-3" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body fw-bold">
+                ✅ 紀錄成功！
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}
