@@ -1,0 +1,61 @@
+/* Custom Styling for 營養均衡小幫手 */
+
+body {
+    font-family: 'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.btn-success {
+    background-color: #2e7d32;
+    border-color: #2e7d32;
+}
+
+.btn-success:hover {
+    background-color: #1b5e20;
+    border-color: #1b5e20;
+}
+
+.text-success {
+    color: #2e7d32 !important;
+}
+
+.bg-success {
+    background-color: #2e7d32 !important;
+}
+
+/* Custom Aesthetic Colors */
+.color-protein { color: #E07A5F !important; }
+.bg-protein { background-color: #E07A5F !important; color: white; }
+.btn-protein { background-color: #E07A5F !important; color: white; border-color: #E07A5F !important; }
+.btn-protein:hover { background-color: #D0694E !important; border-color: #D0694E !important; color: white; }
+.btn-outline-protein { color: #E07A5F !important; border-color: #E07A5F !important; background-color: transparent; }
+.btn-outline-protein:hover { background-color: #E07A5F !important; color: white !important; }
+
+.color-carb { color: #D4A373 !important; }
+.bg-carb { background-color: #F2CC8F !important; color: #333; }
+.btn-carb { background-color: #F2CC8F !important; color: #333; border-color: #F2CC8F !important; }
+.btn-carb:hover { background-color: #E1BB7E !important; border-color: #E1BB7E !important; color: #333; }
+.btn-outline-carb { color: #D4A373 !important; border-color: #D4A373 !important; background-color: transparent; }
+.btn-outline-carb:hover { background-color: #D4A373 !important; color: white !important; }
+
+.color-veggie { color: #81B29A !important; }
+.bg-veggie { background-color: #81B29A !important; color: white; }
+.btn-veggie { background-color: #81B29A !important; color: white; border-color: #81B29A !important; }
+.btn-veggie:hover { background-color: #70A189 !important; border-color: #70A189 !important; color: white; }
+.btn-outline-veggie { color: #81B29A !important; border-color: #81B29A !important; background-color: transparent; }
+.btn-outline-veggie:hover { background-color: #81B29A !important; color: white !important; }

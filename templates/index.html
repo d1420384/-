@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}首頁 - 營養均衡小幫手{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Left Column: Quick Record -->
+    <div class="col-lg-5">
+        <!-- F-01: Quick Record -->
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-4"><i class="bi bi-plus-circle me-2 text-success"></i>快速紀錄</h4>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-protein rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="bi bi-egg-fried"></i>
+                        </div>
+                        <h5 class="mb-0 fw-bold">蛋白質</h5>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-protein btn-sm rounded-pill px-3" onclick="addNutrient('proteins', -1)">-1</button>
+                        <span class="mx-2 fw-bold fs-5 color-protein" id="val-proteins">0</span>
+                        <button class="btn btn-protein btn-sm rounded-pill px-3 shadow-sm" onclick="addNutrient('proteins', 1)">+1</button>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-carb rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="bi bi-basket2-fill"></i>
+                        </div>
+                        <h5 class="mb-0 fw-bold">澱粉</h5>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-carb btn-sm rounded-pill px-3" onclick="addNutrient('carbs', -1)">-1</button>
+                        <span class="mx-2 fw-bold fs-5 color-carb" id="val-carbs">0</span>
+                        <button class="btn btn-carb btn-sm rounded-pill px-3 shadow-sm" onclick="addNutrient('carbs', 1)">+1</button>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-veggie rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="bi bi-flower1"></i>
+                        </div>
+                        <h5 class="mb-0 fw-bold">蔬果</h5>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-veggie btn-sm rounded-pill px-3" onclick="addNutrient('veggies', -1)">-1</button>
+                        <span class="mx-2 fw-bold fs-5 color-veggie" id="val-veggies">0</span>
+                        <button class="btn btn-veggie btn-sm rounded-pill px-3 shadow-sm" onclick="addNutrient('veggies', 1)">+1</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- F-02: Whole Food Shortcuts -->
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-4"><i class="bi bi-lightning-charge me-2 text-warning"></i>原型食物快捷鍵</h4>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('proteins', 1)">
+                            <div class="fs-4 mb-2">🍗</div>
+                            <div class="fw-bold">雞胸肉</div>
+                            <small class="text-muted">+1 蛋白質</small>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('carbs', 1)">
+                            <div class="fs-4 mb-2">🍠</div>
+                            <div class="fw-bold">地瓜</div>
+                            <small class="text-muted">+1 澱粉</small>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('proteins', 1)">
+                            <div class="fs-4 mb-2">🥛</div>
+                            <div class="fw-bold">無糖豆漿</div>
+                            <small class="text-muted">+1 蛋白質</small>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('veggies', 1)">
+                            <div class="fs-4 mb-2">🥦</div>
+                            <div class="fw-bold">燙青菜</div>
+                            <small class="text-muted">+1 蔬果</small>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('veggies', 1)">
+                            <div class="fs-4 mb-2">🍎</div>
+                            <div class="fw-bold">蘋果</div>
+                            <small class="text-muted">+1 蔬果</small>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('veggies', 1)">
+                            <div class="fs-4 mb-2">🍌</div>
+                            <div class="fw-bold">香蕉</div>
+                            <small class="text-muted">+1 蔬果</small>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('proteins', 1)">
+                            <div class="fs-4 mb-2">🥚</div>
+                            <div class="fw-bold">雞蛋</div>
+                            <small class="text-muted">+1 蛋白質</small>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('proteins', 1)">
+                            <div class="fs-4 mb-2">🥜</div>
+                            <div class="fw-bold">堅果</div>
+                            <small class="text-muted">+1 蛋白質</small>
+                        </button>
+                    </div>
+                    <!-- Custom Food Button -->
+                    <div class="col-12 mt-3">
+                        <button class="btn btn-outline-primary w-100 p-3 rounded-pill hover-shadow fw-bold border-2" data-bs-toggle="modal" data-bs-target="#customFoodModal">
+                            <i class="bi bi-pencil-square me-2"></i>自己輸入想吃的食物
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Dashboard F-03 -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-body p-4 d-flex flex-column">
+                <h4 class="fw-bold mb-4"><i class="bi bi-pie-chart-fill me-2 text-primary"></i>今日營養儀表板</h4>
+                <div class="flex-grow-1 d-flex justify-content-center align-items-center" style="min-height: 300px;">
+                    <canvas id="nutritionChart" style="max-width: 400px; max-height: 400px;"></canvas>
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-muted mb-0">理想比例參考：蛋白質 30% / 澱粉 20% / 蔬果 50%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Food Modal -->
+<div class="modal fade" id="customFoodModal" tabindex="-1" aria-labelledby="customFoodModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-primary text-white rounded-top-4 border-0">
+        <h5 class="modal-title fw-bold" id="customFoodModalLabel"><i class="bi bi-pencil-square me-2"></i>新增自訂食物</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form id="customFoodForm">
+            <div class="mb-3">
+                <label for="customFoodName" class="form-label fw-bold">食物名稱</label>
+                <input type="text" class="form-control" id="customFoodName" placeholder="例如：燕麥奶、鮭魚..." required>
+            </div>
+            <div class="mb-3">
+                <label for="customFoodCategory" class="form-label fw-bold">主要營養類別</label>
+                <select class="form-select" id="customFoodCategory" required>
+                    <option value="" disabled selected>請選擇類別...</option>
+                    <option value="proteins">蛋白質</option>
+                    <option value="carbs">澱粉</option>
+                    <option value="veggies">蔬果</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="customFoodAmount" class="form-label fw-bold">份數</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="customFoodAmount" value="1" min="0.5" step="0.5" required>
+                    <span class="input-group-text bg-light">份</span>
+                </div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer border-0 px-4 pb-4 pt-0">
+        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="submitCustomFood()">新增紀錄</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

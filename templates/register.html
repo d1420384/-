@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}註冊 - 營養均衡小幫手{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow border-0 rounded-4 glass-card">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 60px; height: 60px;">
+                        <i class="bi bi-person-plus fs-3"></i>
+                    </div>
+                    <h2 class="fw-bold">建立帳號</h2>
+                    <p class="text-muted">加入我們，開始您的健康飲食旅程！</p>
+                </div>
+                
+                <form method="POST" action="{{ url_for('register') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-semibold">帳號</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="username" name="username" required placeholder="請設定帳號名稱">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold">密碼</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control border-start-0 ps-0" id="password" name="password" required placeholder="請設定密碼">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold rounded-pill shadow-sm mb-3">立即註冊</button>
+                    <div class="text-center">
+                        <span class="text-muted">已經有帳號了？</span> <a href="{{ url_for('login') }}" class="text-success fw-bold text-decoration-none">返回登入</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
