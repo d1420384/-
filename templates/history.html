@@ -10,6 +10,15 @@
 
         <div class="card shadow-sm border-0 rounded-4 mb-4 glass-card">
             <div class="card-body p-4">
+                <h4 class="fw-bold mb-4">過去七天營養趨勢</h4>
+                <div class="chart-container position-relative" style="height: 300px;">
+                    <canvas id="historyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-4 mb-4 glass-card">
+            <div class="card-body p-4">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" id="history-table">
                         <thead class="table-light rounded-top">
@@ -50,38 +59,128 @@
             const data = await response.json();
             
             if (data.status === 'success') {
-                const tbody = document.getElementById('history-tbody');
-                tbody.innerHTML = '';
-                
-                if (data.raw_records.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">目前沒有紀錄喔！開始去主控台新增吧🥗</td></tr>';
-                    return;
-                }
-                
-                data.raw_records.forEach(record => {
-                    const row = document.createElement('tr');
-                    
-                    let contentLabel = '';
-                    if (record.food_name) {
-                        contentLabel = `<span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-medium">${record.food_name}</span>`;
-                    } else {
-                        contentLabel = `<span class="text-muted"><i class="bi bi-pencil-square"></i> 手動紀錄</span>`;
-                    }
-
-                    row.innerHTML = `
-                        <td class="fw-medium">${record.date}</td>
-                        <td>${contentLabel}</td>
-                        <td class="text-center fw-bold text-danger">${record.protein_portions > 0 ? '+' + record.protein_portions : record.protein_portions}</td>
-                        <td class="text-center fw-bold text-warning">${record.carb_portions > 0 ? '+' + record.carb_portions : record.carb_portions}</td>
-                        <td class="text-center fw-bold text-success">${record.veg_portions > 0 ? '+' + record.veg_portions : record.veg_portions}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
+                renderHistoryTable(data.raw_records);
+                renderHistoryChart(data.daily_stats);
             }
         } catch (error) {
             console.error('Error fetching history:', error);
             document.getElementById('history-tbody').innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">載入失敗，請稍後再試。</td></tr>';
         }
+    }
+
+    function renderHistoryTable(records) {
+        const tbody = document.getElementById('history-tbody');
+        tbody.innerHTML = '';
+        
+        if (records.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">目前沒有紀錄喔！開始去主控台新增吧🥗</td></tr>';
+            return;
+        }
+        
+        records.forEach(record => {
+            const row = document.createElement('tr');
+            
+            let contentLabel = '';
+            if (record.food_name) {
+                contentLabel = `<span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-medium">${record.food_name}</span>`;
+            } else {
+                contentLabel = `<span class="text-muted"><i class="bi bi-pencil-square"></i> 手動紀錄</span>`;
+            }
+
+            row.innerHTML = `
+                <td class="fw-medium">${record.date}</td>
+                <td>${contentLabel}</td>
+                <td class="text-center fw-bold text-danger">${record.protein_portions > 0 ? '+' + record.protein_portions : record.protein_portions}</td>
+                <td class="text-center fw-bold text-warning">${record.carb_portions > 0 ? '+' + record.carb_portions : record.carb_portions}</td>
+                <td class="text-center fw-bold text-success">${record.veg_portions > 0 ? '+' + record.veg_portions : record.veg_portions}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    let historyChart = null;
+
+    function renderHistoryChart(dailyStats) {
+        // dailyStats is ordered by date DESC. Reverse it for the chart.
+        const stats = [...dailyStats].reverse();
+
+        const labels = stats.map(s => s.date.substring(5)); // Show MM-DD
+        const proteinData = stats.map(s => s.protein || 0);
+        const carbData = stats.map(s => s.carb || 0);
+        const vegData = stats.map(s => s.veg || 0);
+
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        
+        Chart.defaults.font.family = "'Noto Sans TC', sans-serif";
+
+        if (historyChart) {
+            historyChart.destroy();
+        }
+
+        historyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: '蛋白質',
+                        data: proteinData,
+                        backgroundColor: '#ff4d6d',
+                        borderRadius: 4
+                    },
+                    {
+                        label: '澱粉',
+                        data: carbData,
+                        backgroundColor: '#ffb703',
+                        borderRadius: 4
+                    },
+                    {
+                        label: '蔬果',
+                        data: vegData,
+                        backgroundColor: '#2a9d8f',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '份數'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#2b2d42',
+                        bodyColor: '#2b2d42',
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                }
+            }
+        });
     }
 </script>
 {% endblock %}
