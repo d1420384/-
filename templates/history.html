@@ -1,87 +1,44 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
+{% block title %}歷史紀錄 - 營養均衡小幫手{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <h2 class="fw-bold mb-0">過去一週歷史紀錄</h2>
-            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary rounded-pill fw-bold">← 返回主控台</a>
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-4">
+        <h4 class="fw-bold mb-4"><i class="bi bi-calendar-check me-2 text-success"></i>過去七天紀錄</h4>
+        
+        {% if records %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>日期</th>
+                        <th class="text-center">蛋白質 (份)</th>
+                        <th class="text-center">澱粉 (份)</th>
+                        <th class="text-center">蔬果 (份)</th>
+                        <th class="text-center">總份數</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in records %}
+                    <tr>
+                        <td><span class="badge bg-secondary rounded-pill fs-6">{{ row['date'] }}</span></td>
+                        <td class="text-center fw-bold color-protein">{{ row['proteins'] }}</td>
+                        <td class="text-center fw-bold color-carb">{{ row['carbs'] }}</td>
+                        <td class="text-center fw-bold color-veggie">{{ row['veggies'] }}</td>
+                        <td class="text-center fw-bold">{{ row['proteins'] + row['carbs'] + row['veggies'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-
-        <div class="card shadow-sm border-0 rounded-4 mb-4 glass-card">
-            <div class="card-body p-4">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="history-table">
-                        <thead class="table-light rounded-top">
-                            <tr>
-                                <th scope="col" class="py-3 rounded-start">日期</th>
-                                <th scope="col" class="py-3">紀錄內容</th>
-                                <th scope="col" class="py-3 text-center">蛋白質 (份)</th>
-                                <th scope="col" class="py-3 text-center">澱粉 (份)</th>
-                                <th scope="col" class="py-3 text-center rounded-end">蔬果 (份)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-tbody">
-                            <!-- Data will be populated by JS -->
-                            <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">
-                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                                    載入中...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="text-muted mb-3"><i class="bi bi-journal-x fs-1"></i></div>
+            <h5 class="text-muted">目前還沒有任何飲食紀錄喔！</h5>
+            <a href="{{ url_for('index') }}" class="btn btn-success mt-3 rounded-pill px-4">去記錄第一筆資料</a>
         </div>
+        {% endif %}
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        fetchHistory();
-    });
-
-    async function fetchHistory() {
-        try {
-            const response = await fetch('/api/history');
-            const data = await response.json();
-            
-            if (data.status === 'success') {
-                const tbody = document.getElementById('history-tbody');
-                tbody.innerHTML = '';
-                
-                if (data.raw_records.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">目前沒有紀錄喔！開始去主控台新增吧🥗</td></tr>';
-                    return;
-                }
-                
-                data.raw_records.forEach(record => {
-                    const row = document.createElement('tr');
-                    
-                    let contentLabel = '';
-                    if (record.food_name) {
-                        contentLabel = `<span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-medium">${record.food_name}</span>`;
-                    } else {
-                        contentLabel = `<span class="text-muted"><i class="bi bi-pencil-square"></i> 手動紀錄</span>`;
-                    }
-
-                    row.innerHTML = `
-                        <td class="fw-medium">${record.date}</td>
-                        <td>${contentLabel}</td>
-                        <td class="text-center fw-bold text-danger">${record.protein_portions > 0 ? '+' + record.protein_portions : record.protein_portions}</td>
-                        <td class="text-center fw-bold text-warning">${record.carb_portions > 0 ? '+' + record.carb_portions : record.carb_portions}</td>
-                        <td class="text-center fw-bold text-success">${record.veg_portions > 0 ? '+' + record.veg_portions : record.veg_portions}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            }
-        } catch (error) {
-            console.error('Error fetching history:', error);
-            document.getElementById('history-tbody').innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">載入失敗，請稍後再試。</td></tr>';
-        }
-    }
-</script>
 {% endblock %}

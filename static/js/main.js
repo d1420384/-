@@ -1,108 +1,18 @@
 let nutritionChart = null;
 
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if we are on dashboard by checking for canvas
+    // Only init chart if the canvas exists (we are on the index page)
     if (document.getElementById('nutritionChart')) {
         initChart();
         fetchTodayStats();
     }
 });
 
-function updateQty(type, amount) {
-    const el = document.getElementById(`${type}-qty`);
-    if (el) {
-        let current = parseInt(el.innerText);
-        let newQty = current + amount;
-        if (newQty < 0) newQty = 0;
-        el.innerText = newQty;
-        
-        // Add a small animation effect
-        el.style.transform = 'scale(1.5)';
-        el.style.color = 'var(--primary-color)';
-        setTimeout(() => {
-            el.style.transform = 'scale(1)';
-            el.style.color = '';
-        }, 150);
-    }
-}
-
-async function submitManualRecord() {
-    const protein = parseInt(document.getElementById('protein-qty').innerText);
-    const carb = parseInt(document.getElementById('carb-qty').innerText);
-    const veg = parseInt(document.getElementById('veg-qty').innerText);
-    
-    if (protein === 0 && carb === 0 && veg === 0) {
-        alert('請至少輸入一份營養素喔！');
-        return;
-    }
-    
-    await sendRecord({ protein, carb, veg, food_name: '' });
-    
-    // Reset manual inputs
-    document.getElementById('protein-qty').innerText = '0';
-    document.getElementById('carb-qty').innerText = '0';
-    document.getElementById('veg-qty').innerText = '0';
-}
-
-async function addPrototypeFood(foodName, protein, carb, veg) {
-    await sendRecord({ protein, carb, veg, food_name: foodName });
-}
-
-async function sendRecord(data) {
-    try {
-        const response = await fetch('/api/record', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-        
-        const result = await response.json();
-        if (result.status === 'success') {
-            showToast();
-            fetchTodayStats();
-        } else {
-            alert(result.message || '紀錄失敗');
-        }
-    } catch (error) {
-        console.error('Error saving record:', error);
-        alert('系統發生錯誤，請稍後再試。');
-    }
-}
-
-function showToast() {
-    const toastEl = document.getElementById('liveToast');
-    const toast = new bootstrap.Toast(toastEl);
-    toast.show();
-}
-
-async function fetchTodayStats() {
-    try {
-        const response = await fetch('/api/today');
-        const result = await response.json();
-        
-        if (result.status === 'success') {
-            const data = result.data;
-            
-            // Animate numbers
-            animateValue('total-protein', 0, data.protein, 500);
-            animateValue('total-carb', 0, data.carb, 500);
-            animateValue('total-veg', 0, data.veg, 500);
-            
-            updateChart(data.protein, data.carb, data.veg);
-        }
-    } catch (error) {
-        console.error('Error fetching stats:', error);
-    }
-}
-
 function initChart() {
     const ctx = document.getElementById('nutritionChart').getContext('2d');
     
-    Chart.defaults.color = 'rgba(255, 255, 255, 0.8)';
-    Chart.defaults.font.family = "'Noto Sans TC', sans-serif";
-    
+    // Initial empty chart
     nutritionChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -110,83 +20,111 @@ function initChart() {
             datasets: [{
                 data: [0, 0, 0],
                 backgroundColor: [
-                    '#ff4d6d', // Red/Pink for Protein
-                    '#ffb703', // Yellow for Carb
-                    '#2a9d8f'  // Green for Veg
+                    '#E07A5F', // Protein (Terracotta)
+                    '#F2CC8F', // Carbs (Warm Yellow)
+                    '#81B29A'  // Veggies (Sage Green)
                 ],
                 borderWidth: 0,
-                hoverOffset: 10
+                hoverOffset: 4
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '75%',
+            cutout: '70%',
             plugins: {
                 legend: {
                     position: 'bottom',
                     labels: {
                         padding: 20,
-                        usePointStyle: true,
-                        pointStyle: 'circle'
+                        font: {
+                            size: 14,
+                            family: "'Inter', sans-serif"
+                        }
                     }
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    titleColor: '#2b2d42',
-                    bodyColor: '#2b2d42',
-                    padding: 12,
-                    cornerRadius: 8,
                     callbacks: {
                         label: function(context) {
                             return ` ${context.label}: ${context.raw} 份`;
                         }
                     }
                 }
-            },
-            animation: {
-                animateScale: true,
-                animateRotate: true,
-                duration: 1000,
-                easing: 'easeOutQuart'
             }
         }
     });
 }
 
-function updateChart(protein, carb, veg) {
-    if (nutritionChart) {
-        if (protein === 0 && carb === 0 && veg === 0) {
-            // Show a gray placeholder if no data yet
-            nutritionChart.data.datasets[0].data = [1];
-            nutritionChart.data.datasets[0].backgroundColor = ['rgba(255, 255, 255, 0.2)'];
-            nutritionChart.data.labels = ['尚未紀錄'];
+function fetchTodayStats() {
+    fetch('/api/today')
+        .then(response => response.json())
+        .then(data => {
+            updateUI(data.proteins, data.carbs, data.veggies);
+        })
+        .catch(error => console.error('Error fetching stats:', error));
+}
+
+function addNutrient(type, amount) {
+    fetch('/api/record', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            type: type,
+            amount: amount
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Re-fetch stats to update UI and chart
+            fetchTodayStats();
         } else {
-            nutritionChart.data.datasets[0].data = [protein, carb, veg];
-            nutritionChart.data.datasets[0].backgroundColor = ['#ff4d6d', '#ffb703', '#2a9d8f'];
-            nutritionChart.data.labels = ['蛋白質', '澱粉', '蔬果'];
+            alert('紀錄失敗，請稍後再試');
         }
+    })
+    .catch(error => console.error('Error saving record:', error));
+}
+
+function updateUI(proteins, carbs, veggies) {
+    // Update labels
+    document.getElementById('val-proteins').innerText = proteins;
+    document.getElementById('val-carbs').innerText = carbs;
+    document.getElementById('val-veggies').innerText = veggies;
+
+    // Update chart
+    if (nutritionChart) {
+        // If all are 0, we can show a placeholder or just leave it empty
+        // To make the chart look nice even when empty, we could do something, 
+        // but Chart.js handles [0,0,0] gracefully by drawing nothing.
+        nutritionChart.data.datasets[0].data = [proteins, carbs, veggies];
         nutritionChart.update();
     }
 }
 
-// Helper to animate numbers rolling up
-function animateValue(id, start, end, duration) {
-    if (start === end) {
-        document.getElementById(id).innerHTML = end;
+function submitCustomFood() {
+    const name = document.getElementById('customFoodName').value;
+    const category = document.getElementById('customFoodCategory').value;
+    const amount = parseFloat(document.getElementById('customFoodAmount').value);
+
+    if (!name || !category || isNaN(amount) || amount <= 0) {
+        alert('請完整填寫食物名稱、選擇類別，並輸入有效的份數！');
         return;
     }
-    const obj = document.getElementById(id);
-    let startTimestamp = null;
-    const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        obj.innerHTML = Math.floor(progress * (end - start) + start);
-        if (progress < 1) {
-            window.requestAnimationFrame(step);
-        } else {
-            obj.innerHTML = end;
-        }
-    };
-    window.requestAnimationFrame(step);
+
+    // Since we only track macronutrient totals, we just add the amount to the category.
+    // The name is not saved to the DB in this version, but we show a success message.
+    addNutrient(category, amount);
+
+    // Close the modal
+    const modalEl = document.getElementById('customFoodModal');
+    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    modal.hide();
+
+    // Reset the form
+    document.getElementById('customFoodForm').reset();
+    
+    // Show a small alert or toast (optional, but alert is fine for now)
+    // alert(`成功紀錄：${name} (${amount} 份)`);
 }

@@ -11,9 +11,9 @@ CREATE TABLE records (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     date DATE NOT NULL,
-    protein_portions INTEGER DEFAULT 0,
-    carb_portions INTEGER DEFAULT 0,
-    veg_portions INTEGER DEFAULT 0,
-    food_name TEXT,
+    proteins REAL DEFAULT 0,
+    carbs REAL DEFAULT 0,
+    veggies REAL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
