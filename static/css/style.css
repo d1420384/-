@@ -1,34 +1,28 @@
 :root {
-    --primary-color: #4361ee;
-    --primary-light: #4895ef;
-    --secondary-color: #3f37c9;
-    --accent-color: #f72585;
-    --bg-color: #f8f9fa;
-    --text-color: #2b2d42;
-    --glass-bg: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.4);
-    --shadow-soft: 0 8px 32px rgba(31, 38, 135, 0.1);
+    --primary-color: #8da0b8;        /* Morandi Muted Slate Blue */
+    --primary-light: #a4b4c8;        /* Morandi Soft Blue-Grey */
+    --secondary-color: #72849a;      /* Deep Muted Slate */
+    --accent-color: #c38e8e;         /* Morandi Dusty Rose */
+    --bg-color: #f5f4f0;             /* Muted warm-gray background */
+    --text-color: #4a4d50;           /* Soft charcoal text */
+    --card-bg: #ffffff;              /* Solid White Card */
+    --border-color: #e2dfd8;          /* Soft border color */
+    --glass-bg: #ffffff;             /* Replace glass with solid white */
+    --glass-border: #e2dfd8;         /* Replace glass border with solid border */
+    --shadow-soft: 0 4px 16px rgba(114, 132, 154, 0.08); /* Muted slate shadow */
 }
 
 body {
     font-family: 'Noto Sans TC', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
-    background-image: 
-        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-    background-size: 100% 400px;
-    background-repeat: no-repeat;
     min-height: 100vh;
 }
 
 .custom-navbar {
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--glass-border);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(114, 132, 154, 0.05);
 }
 
 .custom-navbar .navbar-brand {
@@ -48,10 +42,8 @@ body {
 }
 
 .glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
     box-shadow: var(--shadow-soft);
 }
 
@@ -62,7 +54,7 @@ body {
 }
 
 .btn-gradient {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    background: var(--primary-color);
     border: none;
     color: white;
     transition: all 0.3s ease;
@@ -70,8 +62,8 @@ body {
 
 .btn-gradient:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
-    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    box-shadow: 0 4px 12px rgba(141, 160, 184, 0.3);
+    background: var(--secondary-color);
 }
 
 .min-vh-75 {
@@ -122,7 +114,7 @@ body {
 }
 
 .bg-gradient-primary {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: #8da0b8; /* Solid Morandi Slate */
 }
 
 .min-h-250px {
@@ -153,4 +145,251 @@ body {
 .table-hover tbody tr:hover {
     background-color: rgba(67, 97, 238, 0.05);
     transform: scale(1.01);
+}
+
+/* Glassmorphism custom components */
+.backdrop-blur {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.z-index-1 {
+    position: relative;
+    z-index: 1;
+}
+
+/* KPI Card Styles */
+.kpi-card {
+    background: var(--card-bg) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-color) !important;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-soft) !important;
+}
+
+.kpi-card-glow {
+    display: none !important;
+}
+
+.kpi-value-highlight {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--primary-color) !important;
+    background: none !important;
+    -webkit-text-fill-color: initial !important;
+    display: inline-block;
+}
+
+.kpi-badge-perfect {
+    background-color: #9ca998 !important; /* Sage green */
+    color: white !important;
+}
+
+.kpi-badge-excellent {
+    background-color: #8da0b8 !important; /* Muted blue */
+    color: white !important;
+}
+
+.kpi-badge-good {
+    background-color: #d4b290 !important; /* Warm Oat */
+    color: white !important;
+}
+
+.kpi-badge-warning {
+    background-color: #c38e8e !important; /* Dusty Rose */
+    color: white !important;
+}
+
+/* History Chart container overrides */
+.chart-container-history {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Morandi Category Color Overrides */
+.bg-danger {
+    background-color: #c38e8e !important; /* Muted Dusty Pink/Red */
+}
+.text-danger {
+    color: #c38e8e !important;
+}
+.btn-danger {
+    background-color: #c38e8e !important;
+    border-color: #c38e8e !important;
+}
+.btn-outline-danger {
+    color: #c38e8e !important;
+    border-color: #c38e8e !important;
+}
+.btn-outline-danger:hover {
+    background-color: #c38e8e !important;
+    color: white !important;
+}
+
+.bg-warning {
+    background-color: #d4b290 !important; /* Muted Warm Oat Yellow */
+}
+.text-warning {
+    color: #d4b290 !important;
+}
+.btn-warning {
+    background-color: #d4b290 !important;
+    border-color: #d4b290 !important;
+    color: white !important;
+}
+.btn-outline-warning {
+    color: #d4b290 !important;
+    border-color: #d4b290 !important;
+}
+.btn-outline-warning:hover {
+    background-color: #d4b290 !important;
+    color: white !important;
+}
+
+.bg-success {
+    background-color: #9ca998 !important; /* Muted Sage Green */
+}
+.text-success {
+    color: #9ca998 !important;
+}
+.btn-success {
+    background-color: #9ca998 !important;
+    border-color: #9ca998 !important;
+}
+.btn-outline-success {
+    color: #9ca998 !important;
+    border-color: #9ca998 !important;
+}
+.btn-outline-success:hover {
+    background-color: #9ca998 !important;
+    color: white !important;
+}
+
+.bg-primary.bg-opacity-10 {
+    background-color: rgba(141, 160, 184, 0.15) !important;
+}
+.text-primary {
+    color: #72849a !important;
+}
+.btn-primary {
+    background-color: #8da0b8 !important;
+    border-color: #8da0b8 !important;
+}
+.btn-primary:hover {
+    background-color: #72849a !important;
+    border-color: #72849a !important;
+}
+.btn-outline-primary {
+    color: #8da0b8 !important;
+    border-color: #8da0b8 !important;
+}
+.btn-outline-primary:hover {
+    background-color: #8da0b8 !important;
+    color: white !important;
+}
+
+/* Custom Navbar overrides for solid look */
+.custom-navbar .navbar-brand {
+    color: #72849a !important;
+}
+.custom-navbar .nav-link {
+    color: #4a4d50 !important;
+}
+.custom-navbar .nav-link:hover {
+    color: #72849a !important;
+}
+
+/* Additional Solid styles for food shortcuts */
+.food-btn {
+    border-color: var(--border-color) !important;
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+.food-btn:hover {
+    background-color: var(--bg-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.btn-outline-primary {
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+}
+.btn-outline-primary:hover {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.btn-outline-warning {
+    border-color: #d4b290 !important;
+    color: #d4b290 !important;
+}
+.btn-outline-warning:hover {
+    background-color: #d4b290 !important;
+    color: white !important;
+}
+
+.btn-outline-info {
+    border-color: #a4b4c8 !important;
+    color: #72849a !important;
+}
+.btn-outline-info:hover {
+    background-color: #a4b4c8 !important;
+    color: white !important;
+}
+
+/* Manual input quantity box styling */
+.bg-light {
+    background-color: var(--bg-color) !important;
+    border: 1px solid var(--border-color);
+}
+
+/* Custom CSS Tooltip for Balance Badges */
+.custom-tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.custom-tooltip-wrapper .tooltip-text {
+    visibility: hidden;
+    width: 220px;
+    background-color: #4a4d50;
+    color: #ffffff;
+    text-align: left;
+    border-radius: 8px;
+    padding: 10px 14px;
+    position: absolute;
+    z-index: 100;
+    bottom: 130%; /* Position above the badge */
+    left: 50%;
+    transform: translateX(-50%) translateY(5px);
+    opacity: 0;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    font-size: 0.8rem;
+    font-weight: normal;
+    pointer-events: none;
+    line-height: 1.5;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-tooltip-wrapper .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: #4a4d50 transparent transparent transparent;
+}
+
+.custom-tooltip-wrapper:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }

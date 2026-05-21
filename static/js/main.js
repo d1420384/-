@@ -110,9 +110,9 @@ function initChart() {
             datasets: [{
                 data: [0, 0, 0],
                 backgroundColor: [
-                    '#ff4d6d', // Red/Pink for Protein
-                    '#ffb703', // Yellow for Carb
-                    '#2a9d8f'  // Green for Veg
+                    '#c38e8e', // Morandi Rose for Protein
+                    '#d4b290', // Morandi warm beige for Carb
+                    '#9ca998'  // Morandi Sage Green for Veg
                 ],
                 borderWidth: 0,
                 hoverOffset: 10
@@ -139,6 +139,9 @@ function initChart() {
                     cornerRadius: 8,
                     callbacks: {
                         label: function(context) {
+                            if (context.dataset.isPlaceholder) {
+                                return ' 今日尚未記錄飲食';
+                            }
                             return ` ${context.label}: ${context.raw} 份`;
                         }
                     }
@@ -150,20 +153,72 @@ function initChart() {
                 duration: 1000,
                 easing: 'easeOutQuart'
             }
-        }
+        },
+        plugins: [{
+            id: 'centerText',
+            afterDraw: function(chart) {
+                const { ctx, width, height } = chart;
+                ctx.save();
+                
+                let total = 0;
+                const dataset = chart.data.datasets[0];
+                if (dataset && !dataset.isPlaceholder) {
+                    total = dataset.data.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0);
+                }
+                
+                // Draw title text
+                ctx.font = "bold 13px 'Noto Sans TC', sans-serif";
+                ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("今日已攝取", width / 2, height / 2 - 14);
+                
+                // Draw value
+                ctx.font = "800 28px 'Noto Sans TC', sans-serif";
+                ctx.fillStyle = "#ffffff";
+                ctx.fillText(total.toFixed(1) + " 份", width / 2, height / 2 + 16);
+                
+                ctx.restore();
+            }
+        }]
     });
 }
 
+function updateProgressBar(id, current, target) {
+    const pct = Math.min(Math.round((current / target) * 100), 100);
+    const textEl = document.getElementById(`progress-text-${id}`);
+    const barEl = document.getElementById(`progress-bar-${id}`);
+    if (textEl) {
+        textEl.innerText = `${current.toFixed(1)} / ${target.toFixed(1)} 份 (${pct}%)`;
+    }
+    if (barEl) {
+        barEl.style.width = `${pct}%`;
+    }
+}
+
 function updateChart(protein, carb, veg) {
+    // Update target progress bars
+    const targets = {
+        protein: 3.0,
+        carb: 2.0,
+        veg: 5.0
+    };
+    
+    updateProgressBar('protein', protein, targets.protein);
+    updateProgressBar('carb', carb, targets.carb);
+    updateProgressBar('veg', veg, targets.veg);
+
     if (nutritionChart) {
         if (protein === 0 && carb === 0 && veg === 0) {
-            // Show a gray placeholder if no data yet
+            // Show a white-translucent placeholder if no data yet (on Morandi primary color background card)
             nutritionChart.data.datasets[0].data = [1];
-            nutritionChart.data.datasets[0].backgroundColor = ['rgba(255, 255, 255, 0.2)'];
+            nutritionChart.data.datasets[0].backgroundColor = ['rgba(255, 255, 255, 0.25)'];
+            nutritionChart.data.datasets[0].isPlaceholder = true;
             nutritionChart.data.labels = ['尚未紀錄'];
         } else {
             nutritionChart.data.datasets[0].data = [protein, carb, veg];
-            nutritionChart.data.datasets[0].backgroundColor = ['#ff4d6d', '#ffb703', '#2a9d8f'];
+            nutritionChart.data.datasets[0].backgroundColor = ['#c38e8e', '#d4b290', '#9ca998'];
+            nutritionChart.data.datasets[0].isPlaceholder = false;
             nutritionChart.data.labels = ['蛋白質', '澱粉', '蔬果'];
         }
         nutritionChart.update();
@@ -177,6 +232,7 @@ function animateValue(id, start, end, duration) {
         return;
     }
     const obj = document.getElementById(id);
+    if (!obj) return;
     let startTimestamp = null;
     const step = (timestamp) => {
         if (!startTimestamp) startTimestamp = timestamp;

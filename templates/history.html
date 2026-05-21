@@ -2,23 +2,55 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <h2 class="fw-bold mb-0">過去一週歷史紀錄</h2>
-            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary rounded-pill fw-bold">← 返回主控台</a>
+    <div class="col-md-11 col-lg-10">
+        <div class="d-flex align-items-center justify-content-between mb-4 text-white">
+            <h2 class="fw-bold mb-0"><i class="bi bi-calendar2-heart me-2 text-warning"></i>過去一週歷史紀錄</h2>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light rounded-pill fw-bold backdrop-blur">← 返回主控台</a>
         </div>
 
-        <div class="card shadow-sm border-0 rounded-4 mb-4 glass-card">
-            <div class="card-body p-4">
-                <h4 class="fw-bold mb-4">過去七天營養趨勢</h4>
-                <div class="chart-container position-relative" style="height: 300px;">
-                    <canvas id="historyChart"></canvas>
+        <!-- 2-Column Grid for KPI Card and Trend Chart -->
+        <div class="row g-4 mb-4">
+            <!-- Left Column: Health KPI Card -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 rounded-4 glass-card kpi-card shadow-lg text-center overflow-hidden position-relative">
+                    <div class="kpi-card-glow"></div>
+                    <div class="card-body p-4 d-flex flex-column justify-content-between align-items-center z-index-1">
+                        <div>
+                            <h5 class="fw-bold text-muted mb-3">本週健康達成天數</h5>
+                            <div class="kpi-value-container mb-3 position-relative d-inline-block">
+                                <span class="kpi-value-highlight" id="kpi-days">0</span>
+                                <span class="fs-4 text-muted"> / 7 天</span>
+                            </div>
+                        </div>
+                        
+                        <div class="my-3">
+                            <span class="badge kpi-badge px-3 py-2 fs-6 rounded-pill shadow-sm" id="kpi-badge">計算中...</span>
+                        </div>
+                        
+                        <p class="text-secondary small px-2 mt-2 mb-0" id="kpi-message">
+                            載入數據中，為您評估飲食均衡狀態...
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Stacked Trend Chart -->
+            <div class="col-md-8">
+                <div class="card h-100 border-0 rounded-4 glass-card shadow-lg">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3"><i class="bi bi-bar-chart-fill text-primary me-2"></i>過去七天營養趨勢</h4>
+                        <div class="chart-container-history position-relative" style="height: 250px;">
+                            <canvas id="historyChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="card shadow-sm border-0 rounded-4 mb-4 glass-card">
+        <!-- Bottom: Details Table -->
+        <div class="card shadow-lg border-0 rounded-4 mb-4 glass-card">
             <div class="card-body p-4">
+                <h4 class="fw-bold mb-3"><i class="bi bi-journal-text text-success me-2"></i>飲食詳細紀錄</h4>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" id="history-table">
                         <thead class="table-light rounded-top">
@@ -27,13 +59,14 @@
                                 <th scope="col" class="py-3">紀錄內容</th>
                                 <th scope="col" class="py-3 text-center">蛋白質 (份)</th>
                                 <th scope="col" class="py-3 text-center">澱粉 (份)</th>
-                                <th scope="col" class="py-3 text-center rounded-end">蔬果 (份)</th>
+                                <th scope="col" class="py-3 text-center">蔬果 (份)</th>
+                                <th scope="col" class="py-3 text-center rounded-end">均衡狀態</th>
                             </tr>
                         </thead>
                         <tbody id="history-tbody">
                             <!-- Data will be populated by JS -->
                             <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">
+                                <td colspan="6" class="text-center py-4 text-muted">
                                     <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
                                     載入中...
                                 </td>
@@ -61,10 +94,53 @@
             if (data.status === 'success') {
                 renderHistoryTable(data.raw_records);
                 renderHistoryChart(data.daily_stats);
+                calculateHealthKPI(data.daily_stats);
             }
         } catch (error) {
             console.error('Error fetching history:', error);
-            document.getElementById('history-tbody').innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">載入失敗，請稍後再試。</td></tr>';
+            document.getElementById('history-tbody').innerHTML = '<tr><td colspan="6" class="text-center py-4 text-danger">載入失敗，請稍後再試。</td></tr>';
+        }
+    }
+
+    function calculateHealthKPI(dailyStats) {
+        let healthyDaysCount = 0;
+        
+        dailyStats.forEach(day => {
+            // A healthy day is defined as: protein >= 1.0, carb >= 1.0, and veg >= 1.0 portions
+            if ((day.protein || 0) >= 1.0 && (day.carb || 0) >= 1.0 && (day.veg || 0) >= 1.0) {
+                healthyDaysCount++;
+            }
+        });
+        
+        const daysEl = document.getElementById('kpi-days');
+        const badgeEl = document.getElementById('kpi-badge');
+        const messageEl = document.getElementById('kpi-message');
+        
+        if (daysEl) {
+            daysEl.innerText = healthyDaysCount;
+        }
+        
+        if (badgeEl && messageEl) {
+            // Clear existing classes
+            badgeEl.className = 'badge kpi-badge px-3 py-2 fs-6 rounded-pill shadow-sm';
+            
+            if (healthyDaysCount === 7) {
+                badgeEl.innerText = '🏆 黃金極致均衡';
+                badgeEl.classList.add('kpi-badge-perfect');
+                messageEl.innerHTML = '太完美了！本週每天都達到營養均衡標準！您是飲食健康的模範生！🌟';
+            } else if (healthyDaysCount >= 5) {
+                badgeEl.innerText = '🎖️ 飲食表現優異';
+                badgeEl.classList.add('kpi-badge-excellent');
+                messageEl.innerHTML = '非常棒！大部分日子都維持均衡飲食，身體正感謝您的用心照料！💪';
+            } else if (healthyDaysCount >= 3) {
+                badgeEl.innerText = '👍 飲食狀態穩定';
+                badgeEl.classList.add('kpi-badge-good');
+                messageEl.innerHTML = '不錯喔！本週有幾天達成均衡目標。再接再厲，往更多均衡天數邁進！🚀';
+            } else {
+                badgeEl.innerText = '⚠️ 飲食失衡警訊';
+                badgeEl.classList.add('kpi-badge-warning');
+                messageEl.innerHTML = '要注意囉！本週均衡飲食天數偏低，提醒您多攝取蛋白質、澱粉與蔬果！🥦';
+            }
         }
     }
 
@@ -73,7 +149,7 @@
         tbody.innerHTML = '';
         
         if (records.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">目前沒有紀錄喔！開始去主控台新增吧🥗</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">目前沒有紀錄喔！開始去主控台新增吧🥗</td></tr>';
             return;
         }
         
@@ -87,12 +163,43 @@
                 contentLabel = `<span class="text-muted"><i class="bi bi-pencil-square"></i> 手動紀錄</span>`;
             }
 
+            // A record is balanced if protein_portions >= 1.0, carb_portions >= 1.0, and veg_portions >= 1.0
+            const isBalanced = record.protein_portions >= 1.0 && record.carb_portions >= 1.0 && record.veg_portions >= 1.0;
+            
+            let statusBadge = '';
+            if (isBalanced) {
+                statusBadge = '<span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 fw-bold"><i class="bi bi-check-circle-fill me-1"></i>健康均衡</span>';
+            } else {
+                const missing = [];
+                if (record.protein_portions < 1.0) {
+                    missing.push(`蛋白質低於標準 (僅 ${record.protein_portions} / 1.0 份)`);
+                }
+                if (record.carb_portions < 1.0) {
+                    missing.push(`澱粉低於標準 (僅 ${record.carb_portions} / 1.0 份)`);
+                }
+                if (record.veg_portions < 1.0) {
+                    missing.push(`蔬果低於標準 (僅 ${record.veg_portions} / 1.0 份)`);
+                }
+                
+                const tooltipText = `<strong>均衡判斷基準：</strong><br>三大類營養素各攝取至少 1.0 份。<br><br><strong>此筆判定不夠均衡原因：</strong><br>• ${missing.join('<br>• ')}`;
+                
+                statusBadge = `
+                    <div class="custom-tooltip-wrapper">
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2 fw-bold">
+                            <i class="bi bi-exclamation-circle me-1"></i>不夠均衡
+                        </span>
+                        <div class="tooltip-text">${tooltipText}</div>
+                    </div>
+                `;
+            }
+
             row.innerHTML = `
                 <td class="fw-medium">${record.date}</td>
                 <td>${contentLabel}</td>
                 <td class="text-center fw-bold text-danger">${record.protein_portions > 0 ? '+' + record.protein_portions : record.protein_portions}</td>
                 <td class="text-center fw-bold text-warning">${record.carb_portions > 0 ? '+' + record.carb_portions : record.carb_portions}</td>
                 <td class="text-center fw-bold text-success">${record.veg_portions > 0 ? '+' + record.veg_portions : record.veg_portions}</td>
+                <td class="text-center">${statusBadge}</td>
             `;
             tbody.appendChild(row);
         });
@@ -125,19 +232,19 @@
                     {
                         label: '蛋白質',
                         data: proteinData,
-                        backgroundColor: '#ff4d6d',
+                        backgroundColor: '#c38e8e',
                         borderRadius: 4
                     },
                     {
                         label: '澱粉',
                         data: carbData,
-                        backgroundColor: '#ffb703',
+                        backgroundColor: '#d4b290',
                         borderRadius: 4
                     },
                     {
                         label: '蔬果',
                         data: vegData,
-                        backgroundColor: '#2a9d8f',
+                        backgroundColor: '#9ca998',
                         borderRadius: 4
                     }
                 ]
@@ -172,7 +279,7 @@
                     tooltip: {
                         mode: 'index',
                         intersect: false,
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
                         titleColor: '#2b2d42',
                         bodyColor: '#2b2d42',
                         padding: 12,
