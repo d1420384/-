@@ -1,61 +1,188 @@
-/* Custom Styling for 營養均衡小幫手 */
+/* Custom Styling for 營養均衡小幫手 - Premium Revamp */
+
+:root {
+    --protein: #E07A5F;
+    --protein-grad: linear-gradient(135deg, #E07A5F 0%, #F5977D 100%);
+    --protein-light: rgba(224, 122, 95, 0.12);
+    
+    --carb: #D4A373;
+    --carb-grad: linear-gradient(135deg, #D4A373 0%, #E8B98C 100%);
+    --carb-light: rgba(212, 163, 115, 0.12);
+    
+    --veggie: #81B29A;
+    --veggie-grad: linear-gradient(135deg, #81B29A 0%, #9BC6B2 100%);
+    --veggie-light: rgba(129, 178, 154, 0.12);
+    
+    --clean: #3A86C8;
+    --clean-grad: linear-gradient(135deg, #3A86C8 0%, #5AA3E2 100%);
+    --clean-light: rgba(58, 134, 200, 0.12);
+
+    --primary-grad: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%);
+    --bg-grad: linear-gradient(180deg, #F4F7F5 0%, #E9EFEA 100%);
+}
 
 body {
-    font-family: 'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f8f9fa;
-    color: #333;
+    font-family: 'Outfit', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-grad);
+    min-height: 100vh;
+    color: #2D3748;
 }
 
+/* Glassmorphism Cards */
 .glass-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03) !important;
+    border-radius: 20px !important;
 }
 
+.brand-logo-bg {
+    background: var(--primary-grad);
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+}
+
+.brand-text {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.25rem;
+}
+
+/* Hover & Animation Effects */
 .hover-shadow {
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .hover-shadow:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08) !important;
+    border-color: rgba(76, 175, 80, 0.3) !important;
+}
+
+.hover-shadow:active {
+    transform: translateY(-1px) scale(0.98);
 }
 
 .btn-success {
-    background-color: #2e7d32;
-    border-color: #2e7d32;
+    background: var(--primary-grad);
+    border: none;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.25);
+    transition: all 0.2s ease;
 }
 
 .btn-success:hover {
-    background-color: #1b5e20;
-    border-color: #1b5e20;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(76, 175, 80, 0.35);
+    background: linear-gradient(135deg, #276A2B 0%, #3E8E41 100%);
 }
 
-.text-success {
-    color: #2e7d32 !important;
+/* Custom Nutrient Aesthetics */
+.color-protein { color: var(--protein) !important; }
+.bg-protein { background: var(--protein-grad) !important; color: white; }
+.btn-protein { background: var(--protein-grad) !important; color: white; border: none; box-shadow: 0 4px 10px rgba(224, 122, 95, 0.2); }
+.btn-protein:hover { opacity: 0.95; transform: scale(1.05); }
+.btn-outline-protein { color: var(--protein) !important; border: 1.5px solid var(--protein) !important; background-color: transparent; }
+.btn-outline-protein:hover { background: var(--protein-grad) !important; color: white !important; border-color: transparent !important; }
+
+.color-carb { color: var(--carb) !important; }
+.bg-carb { background: var(--carb-grad) !important; color: white; }
+.btn-carb { background: var(--carb-grad) !important; color: white; border: none; box-shadow: 0 4px 10px rgba(212, 163, 115, 0.2); }
+.btn-carb:hover { opacity: 0.95; transform: scale(1.05); }
+.btn-outline-carb { color: var(--carb) !important; border: 1.5px solid var(--carb) !important; background-color: transparent; }
+.btn-outline-carb:hover { background: var(--carb-grad) !important; color: white !important; border-color: transparent !important; }
+
+.color-veggie { color: var(--veggie) !important; }
+.bg-veggie { background: var(--veggie-grad) !important; color: white; }
+.btn-veggie { background: var(--veggie-grad) !important; color: white; border: none; box-shadow: 0 4px 10px rgba(129, 178, 154, 0.2); }
+.btn-veggie:hover { opacity: 0.95; transform: scale(1.05); }
+.btn-outline-veggie { color: var(--veggie) !important; border: 1.5px solid var(--veggie) !important; background-color: transparent; }
+.btn-outline-veggie:hover { background: var(--veggie-grad) !important; color: white !important; border-color: transparent !important; }
+
+.color-clean { color: var(--clean) !important; }
+.bg-clean { background: var(--clean-grad) !important; color: white; }
+
+/* Custom Progress Bars */
+.progress {
+    height: 12px;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.05);
+    overflow: visible;
 }
 
-.bg-success {
-    background-color: #2e7d32 !important;
+.progress-bar-protein { background: var(--protein-grad); border-radius: 10px; }
+.progress-bar-carb { background: var(--carb-grad); border-radius: 10px; }
+.progress-bar-veggie { background: var(--veggie-grad); border-radius: 10px; }
+
+/* Clean Eating Score Badge */
+.score-badge {
+    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEF8 100%);
+    color: #1565C0;
+    font-weight: 700;
+    border-radius: 15px;
+    padding: 10px 20px;
+    box-shadow: 0 4px 15px rgba(21, 101, 192, 0.1);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
 }
 
-/* Custom Aesthetic Colors */
-.color-protein { color: #E07A5F !important; }
-.bg-protein { background-color: #E07A5F !important; color: white; }
-.btn-protein { background-color: #E07A5F !important; color: white; border-color: #E07A5F !important; }
-.btn-protein:hover { background-color: #D0694E !important; border-color: #D0694E !important; color: white; }
-.btn-outline-protein { color: #E07A5F !important; border-color: #E07A5F !important; background-color: transparent; }
-.btn-outline-protein:hover { background-color: #E07A5F !important; color: white !important; }
+.score-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(21, 101, 192, 0.18);
+}
 
-.color-carb { color: #D4A373 !important; }
-.bg-carb { background-color: #F2CC8F !important; color: #333; }
-.btn-carb { background-color: #F2CC8F !important; color: #333; border-color: #F2CC8F !important; }
-.btn-carb:hover { background-color: #E1BB7E !important; border-color: #E1BB7E !important; color: #333; }
-.btn-outline-carb { color: #D4A373 !important; border-color: #D4A373 !important; background-color: transparent; }
-.btn-outline-carb:hover { background-color: #D4A373 !important; color: white !important; }
+/* Whole Food Card Style */
+.food-card-btn {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(220, 220, 220, 0.5);
+    border-radius: 16px;
+    padding: 16px 10px;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    width: 100%;
+}
 
-.color-veggie { color: #81B29A !important; }
-.bg-veggie { background-color: #81B29A !important; color: white; }
-.btn-veggie { background-color: #81B29A !important; color: white; border-color: #81B29A !important; }
-.btn-veggie:hover { background-color: #70A189 !important; border-color: #70A189 !important; color: white; }
-.btn-outline-veggie { color: #81B29A !important; border-color: #81B29A !important; background-color: transparent; }
-.btn-outline-veggie:hover { background-color: #81B29A !important; color: white !important; }
+.food-card-btn:hover {
+    background: #ffffff;
+    border-color: rgba(129, 178, 154, 0.6);
+    box-shadow: 0 6px 15px rgba(129, 178, 154, 0.1) !important;
+}
+
+/* Floating Animation */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0px); }
+}
+
+.floating-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Smooth Table Styles */
+.table-hover tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(76, 175, 80, 0.03) !important;
+}
+
+/* Target Inputs style */
+.target-input {
+    border-radius: 10px;
+    border: 1.5px solid #E2E8F0;
+    padding: 6px 12px;
+    transition: all 0.2s ease;
+}
+
+.target-input:focus {
+    border-color: #81B29A;
+    box-shadow: 0 0 0 3px rgba(129, 178, 154, 0.2);
+    outline: none;
+}
