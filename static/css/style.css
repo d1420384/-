@@ -108,17 +108,28 @@ body {
 }
 
 .food-btn {
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-width: 2px;
+    background-color: white;
 }
 
 .food-btn:hover {
     transform: translateY(-5px);
-    box-shadow: var(--shadow-soft);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
 .food-btn:active {
-    transform: translateY(0);
+    transform: scale(0.95);
+}
+
+.food-btn .badge {
+    font-size: 0.7rem;
+    padding: 0.35em 0.65em;
+}
+
+.small-caps {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
 }
 
 .bg-gradient-primary {
