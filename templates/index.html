@@ -7,9 +7,14 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="glass-card p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div>
-                <h3 class="fw-bold mb-1"><span class="text-success">哈囉，{{ current_user.username }}！</span> 今天要吃得像個國王 👑</h3>
-                <p class="text-muted mb-0"><i class="bi bi-calendar3 me-2 text-success"></i><span id="current-date-str">今天</span></p>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div>
+                    <h3 class="fw-bold mb-1"><span class="text-success">哈囉，{{ current_user.username }}！</span> 今天要吃得像個國王 👑</h3>
+                    <p class="text-muted mb-0"><i class="bi bi-calendar3 me-2 text-success"></i>選擇紀錄日期：</p>
+                </div>
+                <div class="d-flex align-items-center bg-white bg-opacity-70 border rounded-pill px-3 py-1.5 shadow-sm">
+                    <input type="date" id="selected-date" class="border-0 bg-transparent text-dark fw-bold font-monospace" style="outline: none; font-size: 0.95rem;">
+                </div>
             </div>
             <div>
                 <div class="score-badge">
@@ -306,51 +311,19 @@
 
             <!-- Composite Food Inputs -->
             <div id="compositeFoodInputs" style="display: none;" class="bg-light bg-opacity-70 p-3 rounded-4 border border-light mb-3">
-                <p class="text-muted mb-3" style="font-size: 0.8rem;"><i class="bi bi-info-circle me-1"></i>系統已自動估算，您可依實際配菜微調（沒吃到的類別可改為 0 份）：</p>
-                <div class="mb-3">
-                    <label for="compProtein" class="form-label fw-semibold color-protein">🥩 蛋白質份數</label>
-                    <div class="input-group">
-                        <input type="number" class="form-control target-input" id="compProtein" value="1.5" min="0" step="0.5">
-                        <span class="input-group-text bg-light border-0">份</span>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="compCarb" class="form-label fw-semibold color-carb">🌾 澱粉份數</label>
-                    <div class="input-group">
-                        <input type="number" class="form-control target-input" id="compCarb" value="2.0" min="0" step="0.5">
-                        <span class="input-group-text bg-light border-0">份</span>
-                    </div>
-                </div>
+                <!-- Custom Side Dishes (Typed by User) -->
                 <div class="mb-0">
-                    <label for="compVeggie" class="form-label fw-semibold color-veggie">🥦 蔬果份數</label>
-                    <div class="input-group">
-                        <input type="number" class="form-control target-input" id="compVeggie" value="1.0" min="0" step="0.5">
-                        <span class="input-group-text bg-light border-0">份</span>
+                    <label for="customSideDishes" class="form-label fw-bold"><i class="bi bi-pencil-fill text-success me-1"></i>請輸入食物與配菜組成 (自己打)</label>
+                    <input type="text" class="form-control target-input" id="customSideDishes" placeholder="例如：排骨、白飯、高麗菜、2顆茶葉蛋">
+                    <div id="sideDishesAnalysis" class="mt-2 p-3 bg-white rounded-3 border border-dashed border-success border-opacity-30" style="display: none;">
+                        <div class="fw-semibold text-success-emphasis mb-2" style="font-size: 0.85rem;"><i class="bi bi-robot me-1"></i>智慧配菜分析結果：</div>
+                        <div id="sideDishesList" class="d-flex flex-column gap-1" style="font-size: 0.8rem;"></div>
+                        <div class="mt-2 pt-2 border-top border-light-subtle fw-bold text-dark d-flex gap-3" style="font-size: 0.8rem;">
+                            <span class="color-protein">蛋白質: +<span id="sd-calc-protein">0</span> 份</span>
+                            <span class="color-carb">澱粉: +<span id="sd-calc-carb">0</span> 份</span>
+                            <span class="color-veggie">蔬果: +<span id="sd-calc-veggie">0</span> 份</span>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Optional Side Dishes (Multi-select pill checkboxes) -->
-            <div class="mb-0 mt-3 pt-3 border-top border-light-subtle">
-                <label class="form-label fw-bold d-block">🍱 搭配配菜/附餐 (可複選)</label>
-                <div class="d-flex flex-wrap gap-2 mt-2">
-                    <input type="checkbox" class="btn-check" id="sd_egg" autocomplete="off">
-                    <label class="btn btn-outline-success rounded-pill btn-sm py-2 px-3 fw-semibold" for="sd_egg">🍳 荷包蛋 (+1.0 蛋)</label>
-                    
-                    <input type="checkbox" class="btn-check" id="sd_tofu" autocomplete="off">
-                    <label class="btn btn-outline-success rounded-pill btn-sm py-2 px-3 fw-semibold" for="sd_tofu">🥢 滷豆腐 (+1.0 蛋)</label>
-                    
-                    <input type="checkbox" class="btn-check" id="sd_green" autocomplete="off">
-                    <label class="btn btn-outline-success rounded-pill btn-sm py-2 px-3 fw-semibold" for="sd_green">🥦 燙青菜 (+1.0 蔬)</label>
-                    
-                    <input type="checkbox" class="btn-check" id="sd_fruit" autocomplete="off">
-                    <label class="btn btn-outline-success rounded-pill btn-sm py-2 px-3 fw-semibold" for="sd_fruit">🍎 水果切片 (+1.0 蔬)</label>
-                    
-                    <input type="checkbox" class="btn-check" id="sd_sweetpotato" autocomplete="off">
-                    <label class="btn btn-outline-success rounded-pill btn-sm py-2 px-3 fw-semibold" for="sd_sweetpotato">🍠 蒸地瓜 (+1.0 澱)</label>
-                    
-                    <input type="checkbox" class="btn-check" id="sd_drink" autocomplete="off">
-                    <label class="btn btn-outline-success rounded-pill btn-sm py-2 px-3 fw-semibold" for="sd_drink">🧋 甜點飲料 (+1.0 澱)</label>
                 </div>
             </div>
         </form>

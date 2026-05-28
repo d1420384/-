@@ -18,6 +18,12 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+def get_taiwan_date():
+    # Taiwan is UTC+8
+    utc_now = datetime.datetime.now(datetime.timezone.utc)
+    tw_now = utc_now + datetime.timedelta(hours=8)
+    return tw_now.date().isoformat()
+
 def init_db():
     if not os.path.exists(DATABASE):
         with app.app_context():
@@ -165,11 +171,13 @@ def logout():
 @app.route('/api/today', methods=['GET'])
 @login_required
 def get_today_stats():
-    today = datetime.date.today().isoformat()
+    selected_date = request.args.get('date')
+    if not selected_date:
+        selected_date = get_taiwan_date()
     conn = get_db_connection()
     record = conn.execute(
         'SELECT proteins, carbs, veggies, clean_score FROM records WHERE user_id = ? AND date = ?',
-        (current_user.id, today)
+        (current_user.id, selected_date)
     ).fetchone()
     user = conn.execute(
         'SELECT target_proteins, target_carbs, target_veggies FROM users WHERE id = ?',
@@ -213,13 +221,16 @@ def add_record():
     data = request.get_json()
     is_batch = data.get('is_batch', False)
     
-    today = datetime.date.today().isoformat()
+    selected_date = data.get('date')
+    if not selected_date:
+        selected_date = get_taiwan_date()
+        
     conn = get_db_connection()
     
     # 查詢該使用者今日是否已有飲食紀錄
     record = conn.execute(
         'SELECT id, proteins, carbs, veggies, clean_score FROM records WHERE user_id = ? AND date = ?',
-        (current_user.id, today)
+        (current_user.id, selected_date)
     ).fetchone()
     
     if is_batch:
@@ -246,7 +257,7 @@ def add_record():
             cb = max(0, clean_bonus)
             conn.execute(
                 'INSERT INTO records (user_id, date, proteins, carbs, veggies, clean_score) VALUES (?, ?, ?, ?, ?, ?)',
-                (current_user.id, today, p, c, v, cb)
+                (current_user.id, selected_date, p, c, v, cb)
             )
             print(f"[F-01 後端日誌] 批次新增使用者 ID {current_user.id} 今日飲食：蛋白質={p}, 澱粉={c}, 蔬果={v}")
     else:
@@ -279,7 +290,7 @@ def add_record():
             
             conn.execute(
                 'INSERT INTO records (user_id, date, proteins, carbs, veggies, clean_score) VALUES (?, ?, ?, ?, ?, ?)',
-                (current_user.id, today, p, c, v, clean_bonus)
+                (current_user.id, selected_date, p, c, v, clean_bonus)
             )
             print(f"[F-01 後端日誌] 新增使用者 ID {current_user.id} 今日的初始飲食紀錄：蛋白質 {p} 份, 澱粉 {c} 份, 蔬果 {v} 份, 原型食物獎勵 {clean_bonus} 分")
             

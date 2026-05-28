@@ -25,12 +25,18 @@ const FOOD_KEYWORDS = {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Show current date beautifully
-    const dateStrEl = document.getElementById('current-date-str');
-    if (dateStrEl) {
+    // Initialize date selector to today
+    const dateInput = document.getElementById('selected-date');
+    if (dateInput) {
         const today = new Date();
-        const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-        dateStrEl.innerText = today.toLocaleDateString('zh-TW', options);
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        dateInput.value = `${year}-${month}-${day}`;
+        
+        dateInput.addEventListener('change', () => {
+            fetchTodayStats();
+        });
     }
 
     // Only init chart if the canvas exists (we are on the index page)
@@ -102,12 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     isCompCheckbox.dispatchEvent(new Event('change'));
                 }
                 
-                // 預填估計比例
-                document.getElementById('compProtein').value = detectedComp.p;
-                document.getElementById('compCarb').value = detectedComp.c;
-                document.getElementById('compVeggie').value = detectedComp.v;
-                
-                suggestionEl.innerText = `✨ 系統偵測為「${detectedComp.key}」，已為您自動拆分填入預估比例！`;
+                suggestionEl.innerText = `✨ 系統偵測為複合型食物「${detectedComp.key}」，請於下方輸入食物與配菜組成！`;
                 suggestionEl.className = "form-text mt-1 text-success fw-semibold";
                 suggestionEl.style.display = 'block';
                 return;
@@ -154,6 +155,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 suggestionEl.className = "form-text mt-1 text-muted fw-semibold";
                 suggestionEl.style.display = 'block';
             }
+        });
+    }
+
+    // 監聽自訂配菜輸入與智慧分析
+    const customSideDishesInput = document.getElementById('customSideDishes');
+    if (customSideDishesInput) {
+        customSideDishesInput.addEventListener('input', (e) => {
+            const text = e.target.value.trim();
+            const analysisEl = document.getElementById('sideDishesAnalysis');
+            const listEl = document.getElementById('sideDishesList');
+            const calcP = document.getElementById('sd-calc-protein');
+            const calcC = document.getElementById('sd-calc-carb');
+            const calcV = document.getElementById('sd-calc-veggie');
+            
+            if (!text) {
+                analysisEl.style.display = 'none';
+                return;
+            }
+            
+            const result = analyzeSideDishes(text);
+            
+            // Render detected items
+            listEl.innerHTML = '';
+            result.items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'd-flex justify-content-between align-items-center mb-1';
+                
+                let badgeClass = 'bg-secondary bg-opacity-10 text-secondary';
+                if (item.category === 'proteins') badgeClass = 'bg-danger bg-opacity-10 color-protein';
+                else if (item.category === 'carbs') badgeClass = 'bg-warning bg-opacity-10 color-carb';
+                else if (item.category === 'veggies') badgeClass = 'bg-success bg-opacity-10 color-veggie';
+                
+                itemDiv.innerHTML = `
+                    <div>${item.emoji} <span class="fw-semibold text-dark">${item.name}</span></div>
+                    <span class="badge ${badgeClass} rounded-pill font-monospace fw-bold px-2.5 py-1.5" style="font-size: 0.75rem;">
+                        ${item.catName} +${item.val.toFixed(1)} 份
+                    </span>
+                `;
+                listEl.appendChild(itemDiv);
+            });
+            
+            // Update summary counters
+            calcP.innerText = result.proteins.toFixed(1);
+            calcC.innerText = result.carbs.toFixed(1);
+            calcV.innerText = result.veggies.toFixed(1);
+            
+            analysisEl.style.display = 'block';
         });
     }
 });
@@ -211,7 +259,10 @@ function initChart() {
 }
 
 function fetchTodayStats() {
-    fetch('/api/today')
+    const dateInput = document.getElementById('selected-date');
+    const selectedDate = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+    
+    fetch(`/api/today?date=${selectedDate}`)
         .then(response => response.json())
         .then(data => {
             updateUI(
@@ -228,6 +279,9 @@ function fetchTodayStats() {
 }
 
 function addNutrient(type, amount, cleanBonus = 0) {
+    const dateInput = document.getElementById('selected-date');
+    const selectedDate = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+
     fetch('/api/record', {
         method: 'POST',
         headers: {
@@ -236,7 +290,8 @@ function addNutrient(type, amount, cleanBonus = 0) {
         body: JSON.stringify({
             type: type,
             amount: amount,
-            clean_bonus: cleanBonus
+            clean_bonus: cleanBonus,
+            date: selectedDate
         })
     })
     .then(response => response.json())
@@ -306,6 +361,8 @@ function updateUI(proteins, carbs, veggies, cleanScore, tp, tc, tv) {
         }
         nutritionChart.update();
     }
+}
+
 function submitCustomFood() {
     const name = document.getElementById('customFoodName').value;
     const isCompCheckbox = document.getElementById('isCompositeFood');
@@ -316,19 +373,24 @@ function submitCustomFood() {
         return;
     }
 
-    // 取得選填的配菜所提供的營養素 (支援複選)
+    // 取得自訂配菜分析結果
     let extraP = 0, extraC = 0, extraV = 0;
-    if (document.getElementById('sd_egg') && document.getElementById('sd_egg').checked) extraP += 1.0;
-    if (document.getElementById('sd_tofu') && document.getElementById('sd_tofu').checked) extraP += 1.0;
-    if (document.getElementById('sd_green') && document.getElementById('sd_green').checked) extraV += 1.0;
-    if (document.getElementById('sd_fruit') && document.getElementById('sd_fruit').checked) extraV += 1.0;
-    if (document.getElementById('sd_sweetpotato') && document.getElementById('sd_sweetpotato').checked) extraC += 1.0;
-    if (document.getElementById('sd_drink') && document.getElementById('sd_drink').checked) extraC += 1.0;
+    const sideDishesInput = document.getElementById('customSideDishes');
+    if (sideDishesInput && isComp) {
+        const sideDishesText = sideDishesInput.value.trim();
+        const analysis = analyzeSideDishes(sideDishesText);
+        extraP = analysis.proteins;
+        extraC = analysis.carbs;
+        extraV = analysis.veggies;
+    }
 
     if (isComp) {
-        const p = (parseFloat(document.getElementById('compProtein').value) || 0) + extraP;
-        const c = (parseFloat(document.getElementById('compCarb').value) || 0) + extraC;
-        const v = (parseFloat(document.getElementById('compVeggie').value) || 0) + extraV;
+        const p = extraP;
+        const c = extraC;
+        const v = extraV;
+
+        const dateInput = document.getElementById('selected-date');
+        const selectedDate = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
 
         fetch('/api/record', {
             method: 'POST',
@@ -340,7 +402,8 @@ function submitCustomFood() {
                 proteins: p,
                 carbs: c,
                 veggies: v,
-                clean_bonus: 0
+                clean_bonus: 0,
+                date: selectedDate
             })
         })
         .then(response => response.json())
@@ -361,43 +424,8 @@ function submitCustomFood() {
             return;
         }
 
-        // 若有額外加點配菜，則改用 batch 批次方式送出
-        if (extraP > 0 || extraC > 0 || extraV > 0) {
-            let p = 0, c = 0, v = 0;
-            if (category === 'proteins') p = amount;
-            else if (category === 'carbs') c = amount;
-            else if (category === 'veggies') v = amount;
-
-            p += extraP;
-            c += extraC;
-            v += extraV;
-
-            fetch('/api/record', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    is_batch: true,
-                    proteins: p,
-                    carbs: c,
-                    veggies: v,
-                    clean_bonus: 0
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    fetchTodayStats();
-                } else {
-                    alert('紀錄失敗，請稍後再試');
-                }
-            })
-            .catch(error => console.error('Error saving record:', error));
-        } else {
-            // 純單一食物且無額外配菜，走標準記錄
-            addNutrient(category, amount, 0);
-        }
+        // 單一食物直接記錄即可
+        addNutrient(category, amount, 0);
     }
 
     // Close the modal
@@ -418,12 +446,14 @@ function submitCustomFood() {
         document.getElementById('categorySuggestion').style.display = 'none';
     }
     
-    // 清除所有配餐選取按鈕
-    const sdIds = ['sd_egg', 'sd_tofu', 'sd_green', 'sd_fruit', 'sd_sweetpotato', 'sd_drink'];
-    sdIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.checked = false;
-    });
+    // 清除自訂配菜內容與分析面板
+    if (sideDishesInput) {
+        sideDishesInput.value = '';
+    }
+    const analysisEl = document.getElementById('sideDishesAnalysis');
+    if (analysisEl) {
+        analysisEl.style.display = 'none';
+    }
 }
 
 function submitTargets() {
@@ -492,4 +522,123 @@ function showRewardPopup(score) {
     setTimeout(() => {
         popup.remove();
     }, 2100);
+}
+
+// Parse quantity in various formats (numbers, Chinese words, fractions)
+function parseChineseNum(str) {
+    if (str.includes('半')) return 0.5;
+    if (str.includes('一') || str.includes('1')) return 1.0;
+    if (str.includes('二') || str.includes('兩') || str.includes('2')) return 2.0;
+    if (str.includes('三') || str.includes('3')) return 3.0;
+    if (str.includes('四') || str.includes('4')) return 4.0;
+    if (str.includes('五') || str.includes('5')) return 5.0;
+    if (str.includes('六') || str.includes('6')) return 6.0;
+    if (str.includes('七') || str.includes('7')) return 7.0;
+    if (str.includes('八') || str.includes('8')) return 8.0;
+    if (str.includes('九') || str.includes('9')) return 9.0;
+    if (str.includes('十') || str.includes('10')) return 10.0;
+    
+    const val = parseFloat(str);
+    return isNaN(val) ? 1.0 : val;
+}
+
+// Analyze side dishes typed in the text input
+function analyzeSideDishes(text) {
+    if (!text) {
+        return { proteins: 0, carbs: 0, veggies: 0, items: [] };
+    }
+    
+    // Split by commas, spaces, pluses, semicolons
+    const rawItems = text.split(/[,，、\s+\+；;]/).map(x => x.trim()).filter(x => x.length > 0);
+    
+    let totalP = 0;
+    let totalC = 0;
+    let totalV = 0;
+    const detectedItems = [];
+    
+    // Build a sorted keyword list for matching
+    const keywordList = [];
+    for (const [cat, keywords] of Object.entries(FOOD_KEYWORDS)) {
+        for (const kw of keywords) {
+            keywordList.push({ cat, kw, len: kw.length });
+        }
+    }
+    keywordList.sort((a, b) => b.len - a.len);
+
+    for (const item of rawItems) {
+        let multiplier = 1.0;
+        let cleanItemName = item;
+        
+        // Match numbers like 1.5, 2, 0.5 or Chinese numbers like 一, 二, 三, 半 at start
+        const numMatch = item.match(/^([0-9]+(?:\.[0-9]+)?|半|[一二三四五六七八九十兩]|[0-9]+個|[0-9]+顆|[0-9]+碗|[0-9]+份)/);
+        if (numMatch) {
+            const rawNum = numMatch[1];
+            multiplier = parseChineseNum(rawNum);
+            // Remove the quantity prefix from cleanItemName
+            cleanItemName = item.substring(rawNum.length).trim();
+            // Remove leading measure words
+            cleanItemName = cleanItemName.replace(/^[顆個碗份支盤杯片把條克g分]/, '').trim();
+        } else {
+            // Find if there is a number/quantity at the end of the item (e.g. "荷包蛋 2", "白飯 半")
+            const endNumMatch = item.match(/([0-9]+(?:\.[0-9]+)?|半)$/);
+            if (endNumMatch) {
+                const rawNum = endNumMatch[1];
+                multiplier = parseChineseNum(rawNum);
+                cleanItemName = item.substring(0, item.length - rawNum.length).trim();
+            }
+        }
+
+        // Match category using the sorted keywords
+        let category = null;
+        for (const k of keywordList) {
+            if (cleanItemName.includes(k.kw)) {
+                category = k.cat;
+                break;
+            }
+        }
+        
+        if (category) {
+            let catName = '';
+            let emoji = '';
+            let val = multiplier;
+            if (category === 'proteins') {
+                totalP += val;
+                catName = '蛋白質';
+                emoji = '🥩';
+            } else if (category === 'carbs') {
+                totalC += val;
+                catName = '澱粉';
+                emoji = '🌾';
+            } else if (category === 'veggies') {
+                totalV += val;
+                catName = '蔬果';
+                emoji = '🥦';
+            }
+            detectedItems.push({
+                raw: item,
+                name: cleanItemName,
+                category: category,
+                catName: catName,
+                emoji: emoji,
+                val: val
+            });
+        } else {
+            // Unrecognized item
+            detectedItems.push({
+                raw: item,
+                name: cleanItemName,
+                category: 'unknown',
+                catName: '未知 (不計份數)',
+                emoji: '❓',
+                val: 0
+            });
+        }
+    }
+    
+    return {
+        proteins: totalP,
+        carbs: totalC,
+        veggies: totalV,
+        items: detectedItems
+    };
 }
