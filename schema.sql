@@ -14,6 +14,7 @@ CREATE TABLE records (
     proteins REAL DEFAULT 0,
     carbs REAL DEFAULT 0,
     veggies REAL DEFAULT 0,
+    whole_foods REAL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );

@@ -1,61 +1,335 @@
-/* Custom Styling for 營養均衡小幫手 */
+/* Import Premium Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #1b5e20 0%, #4caf50 100%);
+    --bg-gradient: linear-gradient(135deg, #f4f9f4 0%, #fdfbf7 50%, #fff5f5 100%);
+    
+    /* Nutrient Curated HSL Palettes */
+    --protein-color: #e26d5c;
+    --protein-bg: rgba(226, 109, 92, 0.1);
+    --protein-gradient: linear-gradient(135deg, #ff8a75 0%, #e26d5c 100%);
+    
+    --carb-color: #e9b44c;
+    --carb-bg: rgba(233, 180, 76, 0.15);
+    --carb-gradient: linear-gradient(135deg, #f7ce68 0%, #e9b44c 100%);
+    
+    --veggie-color: #5c9e83;
+    --veggie-bg: rgba(92, 158, 131, 0.12);
+    --veggie-gradient: linear-gradient(135deg, #7dbfa3 0%, #5c9e83 100%);
+
+    --whole-food-color: #f1c40f;
+    --whole-food-gradient: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
+}
 
 body {
-    font-family: 'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f8f9fa;
-    color: #333;
+    font-family: 'Outfit', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    color: #2c3e50;
+    position: relative;
+    overflow-x: hidden;
 }
 
-.glass-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+/* Beautiful Background Decorative Orbs */
+body::before, body::after {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(80px);
+    opacity: 0.4;
+}
+body::before {
+    top: 10%;
+    left: -5%;
+    background-color: #81c784;
+}
+body::after {
+    bottom: 10%;
+    right: -5%;
+    background-color: #ffe082;
 }
 
-.hover-shadow {
+/* Navbar Custom Styling */
+.navbar {
+    background: rgba(46, 125, 50, 0.85) !important;
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
 }
 
+.navbar-brand {
+    font-size: 1.4rem;
+    letter-spacing: 0.5px;
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-radius: 10px;
+    padding: 8px 16px !important;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+/* Premium Glassmorphic Cards */
+.glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    border-radius: 1.25rem !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
 .hover-shadow:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Micro-animations and buttons */
+.btn-rounded {
+    border-radius: 50px;
+    font-weight: 600;
+    padding: 10px 24px;
+    transition: all 0.25s ease;
 }
 
 .btn-success {
-    background-color: #2e7d32;
-    border-color: #2e7d32;
+    background: var(--primary-gradient);
+    border: none;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
 }
 
 .btn-success:hover {
-    background-color: #1b5e20;
-    border-color: #1b5e20;
+    background: linear-gradient(135deg, #1b5e20 0%, #388e3c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
 }
 
-.text-success {
-    color: #2e7d32 !important;
+.btn-success:active {
+    transform: translateY(0);
 }
 
-.bg-success {
-    background-color: #2e7d32 !important;
+/* Nutrient-Specific Styling */
+/* Proteins */
+.color-protein { color: var(--protein-color) !important; }
+.bg-protein { background: var(--protein-gradient) !important; color: white; }
+.bg-protein-light { background-color: var(--protein-bg) !important; }
+.btn-protein {
+    background: var(--protein-gradient);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(226, 109, 92, 0.15);
+}
+.btn-protein:hover {
+    background: linear-gradient(135deg, #e26d5c 0%, #c95d4e 100%);
+    color: white;
+    transform: translateY(-2px);
+}
+.btn-outline-protein {
+    color: var(--protein-color);
+    border: 2px solid var(--protein-color);
+    background: transparent;
+}
+.btn-outline-protein:hover {
+    background: var(--protein-gradient);
+    border-color: transparent;
+    color: white !important;
+    transform: translateY(-2px);
 }
 
-/* Custom Aesthetic Colors */
-.color-protein { color: #E07A5F !important; }
-.bg-protein { background-color: #E07A5F !important; color: white; }
-.btn-protein { background-color: #E07A5F !important; color: white; border-color: #E07A5F !important; }
-.btn-protein:hover { background-color: #D0694E !important; border-color: #D0694E !important; color: white; }
-.btn-outline-protein { color: #E07A5F !important; border-color: #E07A5F !important; background-color: transparent; }
-.btn-outline-protein:hover { background-color: #E07A5F !important; color: white !important; }
+/* Carbs */
+.color-carb { color: var(--carb-color) !important; }
+.bg-carb { background: var(--carb-gradient) !important; color: #5d4037; }
+.bg-carb-light { background-color: var(--carb-bg) !important; }
+.btn-carb {
+    background: var(--carb-gradient);
+    color: #5d4037;
+    border: none;
+    box-shadow: 0 4px 10px rgba(233, 180, 76, 0.15);
+}
+.btn-carb:hover {
+    background: linear-gradient(135deg, #e9b44c 0%, #d49f38 100%);
+    color: #5d4037;
+    transform: translateY(-2px);
+}
+.btn-outline-carb {
+    color: var(--carb-color);
+    border: 2px solid var(--carb-color);
+    background: transparent;
+}
+.btn-outline-carb:hover {
+    background: var(--carb-gradient);
+    border-color: transparent;
+    color: #5d4037 !important;
+    transform: translateY(-2px);
+}
 
-.color-carb { color: #D4A373 !important; }
-.bg-carb { background-color: #F2CC8F !important; color: #333; }
-.btn-carb { background-color: #F2CC8F !important; color: #333; border-color: #F2CC8F !important; }
-.btn-carb:hover { background-color: #E1BB7E !important; border-color: #E1BB7E !important; color: #333; }
-.btn-outline-carb { color: #D4A373 !important; border-color: #D4A373 !important; background-color: transparent; }
-.btn-outline-carb:hover { background-color: #D4A373 !important; color: white !important; }
+/* Veggies */
+.color-veggie { color: var(--veggie-color) !important; }
+.bg-veggie { background: var(--veggie-gradient) !important; color: white; }
+.bg-veggie-light { background-color: var(--veggie-bg) !important; }
+.btn-veggie {
+    background: var(--veggie-gradient);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(92, 158, 131, 0.15);
+}
+.btn-veggie:hover {
+    background: linear-gradient(135deg, #5c9e83 0%, #4b856c 100%);
+    color: white;
+    transform: translateY(-2px);
+}
+.btn-outline-veggie {
+    color: var(--veggie-color);
+    border: 2px solid var(--veggie-color);
+    background: transparent;
+}
+.btn-outline-veggie:hover {
+    background: var(--veggie-gradient);
+    border-color: transparent;
+    color: white !important;
+    transform: translateY(-2px);
+}
 
-.color-veggie { color: #81B29A !important; }
-.bg-veggie { background-color: #81B29A !important; color: white; }
-.btn-veggie { background-color: #81B29A !important; color: white; border-color: #81B29A !important; }
-.btn-veggie:hover { background-color: #70A189 !important; border-color: #70A189 !important; color: white; }
-.btn-outline-veggie { color: #81B29A !important; border-color: #81B29A !important; background-color: transparent; }
-.btn-outline-veggie:hover { background-color: #81B29A !important; color: white !important; }
+/* Circular Icon Box */
+.icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Custom Food Item Grid Hover */
+.shortcut-btn {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.shortcut-btn:hover {
+    transform: scale(1.05) translateY(-3px);
+    background: white;
+    border-color: #81c784;
+}
+
+.shortcut-btn:active {
+    transform: scale(0.98);
+}
+
+/* Custom Progress Bars */
+.progress {
+    height: 12px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    overflow: visible;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    position: relative;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-tooltip {
+    position: absolute;
+    right: 0;
+    top: -24px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transform: translateX(50%);
+}
+
+/* Whole Food Reward Widget */
+.reward-panel {
+    background: linear-gradient(135deg, #fffde7 0%, #fff9c4 100%);
+    border: 1px solid #fff59d;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 25px rgba(253, 216, 53, 0.1);
+    transition: all 0.3s ease;
+}
+
+.reward-panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(253, 216, 53, 0.18);
+}
+
+.star-rating {
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    color: #f1c40f;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.star-empty {
+    color: #e0e0e0;
+}
+
+/* Dashboard Chart Center Label */
+.chart-container {
+    position: relative;
+}
+
+/* Table Style Improvements */
+.table {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.table tbody tr {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.015);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    transform: scale(1.005);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.03);
+}
+
+.table td, .table th {
+    border: none;
+    padding: 16px;
+}
+
+.table tbody td:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.table tbody td:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+/* Modal Custom styling */
+.modal-content {
+    border: none !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(25px);
+}
+
+/* Toast message positioning */
+.toast-container {
+    z-index: 1090;
+}

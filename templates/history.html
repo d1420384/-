@@ -3,9 +3,79 @@
 {% block title %}歷史紀錄 - 營養均衡小幫手{% endblock %}
 
 {% block content %}
-<div class="card shadow-sm border-0 rounded-4">
+<div class="row g-4 mb-4">
+    <!-- Summary Cards -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card glass-card h-100 text-center p-3">
+            <div class="text-success mb-2">
+                <i class="bi bi-calendar-check-fill fs-2"></i>
+            </div>
+            <h6 class="text-muted fw-bold mb-1">健康達成率</h6>
+            <h3 class="fw-bold text-success mb-0">
+                {% if days_count > 0 %}
+                    {{ achievement_days }} / {{ days_count }} 天
+                {% else %}
+                    0 / 0 天
+                {% endif %}
+            </h3>
+            <small class="text-muted mt-1">均符合 3:2:5 攝取</small>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6">
+        <div class="card glass-card h-100 text-center p-3">
+            <div class="text-danger mb-2">
+                <i class="bi bi-egg-fried fs-2"></i>
+            </div>
+            <h6 class="text-muted fw-bold mb-1">累計蛋白質</h6>
+            <h3 class="fw-bold text-danger mb-0">{{ total_proteins }} <span class="fs-6 fw-normal">份</span></h3>
+            <small class="text-muted mt-1">本週肌肉修復原料</small>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+        <div class="card glass-card h-100 text-center p-3">
+            <div class="text-warning mb-2">
+                <i class="bi bi-basket2-fill fs-2"></i>
+            </div>
+            <h6 class="text-muted fw-bold mb-1">累計澱粉</h6>
+            <h3 class="fw-bold text-warning text-dark mb-0">{{ total_carbs }} <span class="fs-6 fw-normal">份</span></h3>
+            <small class="text-muted mt-1">本週日常活力來源</small>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+        <div class="card glass-card h-100 text-center p-3">
+            <div class="text-success mb-2">
+                <i class="bi bi-flower1 fs-2"></i>
+            </div>
+            <h6 class="text-muted fw-bold mb-1">累計蔬果 & 原型</h6>
+            <h3 class="fw-bold text-success mb-0">{{ total_veggies }} <span class="fs-6 fw-normal">份</span></h3>
+            <small class="text-success fw-bold"><i class="bi bi-award-fill me-1"></i>原型食物 {{ total_whole_foods }} 點</small>
+        </div>
+    </div>
+</div>
+
+<!-- Trend Chart Card -->
+<div class="card glass-card hover-shadow mb-4">
     <div class="card-body p-4">
-        <h4 class="fw-bold mb-4"><i class="bi bi-calendar-check me-2 text-success"></i>過去七天紀錄</h4>
+        <h4 class="fw-bold mb-4"><i class="bi bi-graph-up-arrow me-2 text-success"></i>過去七天飲食趨勢</h4>
+        {% if records %}
+            <div style="position: relative; height: 320px; width: 100%;">
+                <canvas id="historyChart"></canvas>
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <p class="text-muted">暫無數據以繪製圖表</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Detailed Records Table -->
+<div class="card glass-card hover-shadow">
+    <div class="card-body p-4">
+        <h4 class="fw-bold mb-4"><i class="bi bi-calendar-week me-2 text-success"></i>每日飲食明細</h4>
         
         {% if records %}
         <div class="table-responsive">
@@ -16,17 +86,35 @@
                         <th class="text-center">蛋白質 (份)</th>
                         <th class="text-center">澱粉 (份)</th>
                         <th class="text-center">蔬果 (份)</th>
+                        <th class="text-center">原型食物 (點)</th>
                         <th class="text-center">總份數</th>
+                        <th class="text-center">狀態</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for row in records %}
                     <tr>
-                        <td><span class="badge bg-secondary rounded-pill fs-6">{{ row['date'] }}</span></td>
+                        <td>
+                            <span class="badge bg-secondary bg-opacity-75 rounded-pill fs-6 px-3 py-2">
+                                {{ row['date'] }}
+                            </span>
+                        </td>
                         <td class="text-center fw-bold color-protein">{{ row['proteins'] }}</td>
                         <td class="text-center fw-bold color-carb">{{ row['carbs'] }}</td>
                         <td class="text-center fw-bold color-veggie">{{ row['veggies'] }}</td>
-                        <td class="text-center fw-bold">{{ row['proteins'] + row['carbs'] + row['veggies'] }}</td>
+                        <td class="text-center fw-bold text-warning text-dark"><i class="bi bi-star-fill me-1 text-warning"></i>{{ row['whole_foods'] }}</td>
+                        <td class="text-center fw-bold">{{ row['total'] }}</td>
+                        <td class="text-center">
+                            {% if row['achieved'] %}
+                                <span class="badge bg-success rounded-pill px-3 py-2 fw-bold">
+                                    <i class="bi bi-check-circle-fill me-1"></i>健康達成
+                                </span>
+                            {% else %}
+                                <span class="badge bg-light text-muted border rounded-pill px-3 py-2 fw-semibold">
+                                    未達標準
+                                </span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -36,9 +124,105 @@
         <div class="text-center py-5">
             <div class="text-muted mb-3"><i class="bi bi-journal-x fs-1"></i></div>
             <h5 class="text-muted">目前還沒有任何飲食紀錄喔！</h5>
-            <a href="{{ url_for('index') }}" class="btn btn-success mt-3 rounded-pill px-4">去記錄第一筆資料</a>
+            <a href="{{ url_for('index') }}" class="btn btn-success mt-3 btn-rounded shadow-sm">去記錄第一筆資料</a>
         </div>
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% if records %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Pass data from Jinja to JS
+        const records = {{ records | tojson }};
+        
+        // Reverse records so they display chronologically (left to right)
+        records.reverse();
+        
+        const labels = records.map(r => r.date);
+        const proteins = records.map(r => r.proteins);
+        const carbs = records.map(r => r.carbs);
+        const veggies = records.map(r => r.veggies);
+        const wholeFoods = records.map(r => r.whole_foods);
+
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: '蛋白質',
+                        data: proteins,
+                        backgroundColor: '#e26d5c',
+                        borderRadius: 4
+                    },
+                    {
+                        label: '澱粉',
+                        data: carbs,
+                        backgroundColor: '#e9b44c',
+                        borderRadius: 4
+                    },
+                    {
+                        label: '蔬果',
+                        data: veggies,
+                        backgroundColor: '#5c9e83',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                family: "'Outfit', sans-serif"
+                            }
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                family: "'Outfit', sans-serif"
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                family: "'Outfit', sans-serif",
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterBody: function(items) {
+                                // Add whole food info in tooltip
+                                const index = items[0].dataIndex;
+                                return `原型食物: ${wholeFoods[index]} 點`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
 {% endblock %}

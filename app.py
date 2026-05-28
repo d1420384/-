@@ -19,13 +19,21 @@ def get_db_connection():
     return conn
 
 def init_db():
-    if not os.path.exists(DATABASE):
-        with app.app_context():
-            conn = get_db_connection()
+    db_exists = os.path.exists(DATABASE)
+    with app.app_context():
+        conn = get_db_connection()
+        if not db_exists:
             with app.open_resource('schema.sql', mode='r') as f:
                 conn.cursor().executescript(f.read())
             conn.commit()
-            conn.close()
+        else:
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA table_info(records)")
+            columns = [row[1] for row in cursor.fetchall()]
+            if 'whole_foods' not in columns:
+                cursor.execute("ALTER TABLE records ADD COLUMN whole_foods REAL DEFAULT 0")
+                conn.commit()
+        conn.close()
 
 class User(UserMixin):
     def __init__(self, id, username):
@@ -50,13 +58,54 @@ def index():
 @login_required
 def history():
     conn = get_db_connection()
-    # Get the last 7 days of records
     records = conn.execute(
-        'SELECT date, proteins, carbs, veggies FROM records WHERE user_id = ? ORDER BY date DESC LIMIT 7',
+        'SELECT date, proteins, carbs, veggies, whole_foods FROM records WHERE user_id = ? ORDER BY date DESC LIMIT 7',
         (current_user.id,)
     ).fetchall()
     conn.close()
-    return render_template('history.html', records=records)
+
+    records_list = []
+    achievement_days = 0
+    total_proteins = 0
+    total_carbs = 0
+    total_veggies = 0
+    total_whole_foods = 0
+
+    for r in records:
+        p = r['proteins'] or 0
+        c = r['carbs'] or 0
+        v = r['veggies'] or 0
+        wf = r['whole_foods'] or 0
+        
+        total_proteins += p
+        total_carbs += c
+        total_veggies += v
+        total_whole_foods += wf
+        
+        achieved = (p >= 3.0 and c >= 2.0 and v >= 5.0)
+        if achieved:
+            achievement_days += 1
+            
+        records_list.append({
+            'date': r['date'],
+            'proteins': p,
+            'carbs': c,
+            'veggies': v,
+            'whole_foods': wf,
+            'achieved': achieved,
+            'total': p + c + v
+        })
+        
+    return render_template(
+        'history.html', 
+        records=records_list,
+        achievement_days=achievement_days,
+        total_proteins=round(total_proteins, 1),
+        total_carbs=round(total_carbs, 1),
+        total_veggies=round(total_veggies, 1),
+        total_whole_foods=round(total_whole_foods, 1),
+        days_count=len(records_list)
+    )
 
 @app.route('/register', methods=('GET', 'POST'))
 def register():
@@ -117,15 +166,20 @@ def get_today_stats():
     today = datetime.date.today().isoformat()
     conn = get_db_connection()
     record = conn.execute(
-        'SELECT proteins, carbs, veggies FROM records WHERE user_id = ? AND date = ?',
+        'SELECT proteins, carbs, veggies, whole_foods FROM records WHERE user_id = ? AND date = ?',
         (current_user.id, today)
     ).fetchone()
     conn.close()
     
     if record:
-        return jsonify({'proteins': record['proteins'], 'carbs': record['carbs'], 'veggies': record['veggies']})
+        return jsonify({
+            'proteins': record['proteins'] or 0,
+            'carbs': record['carbs'] or 0,
+            'veggies': record['veggies'] or 0,
+            'whole_foods': record['whole_foods'] or 0
+        })
     else:
-        return jsonify({'proteins': 0, 'carbs': 0, 'veggies': 0})
+        return jsonify({'proteins': 0, 'carbs': 0, 'veggies': 0, 'whole_foods': 0})
 
 @app.route('/api/record', methods=['POST'])
 @login_required
@@ -133,6 +187,7 @@ def add_record():
     data = request.get_json()
     nutrient_type = data.get('type') # 'proteins', 'carbs', 'veggies'
     amount = float(data.get('amount', 1.0))
+    is_whole_food = bool(data.get('is_whole_food', False))
     
     if nutrient_type not in ['proteins', 'carbs', 'veggies']:
         return jsonify({'error': 'Invalid nutrient type'}), 400
@@ -140,7 +195,7 @@ def add_record():
     today = datetime.date.today().isoformat()
     conn = get_db_connection()
     record = conn.execute(
-        'SELECT id, proteins, carbs, veggies FROM records WHERE user_id = ? AND date = ?',
+        'SELECT id, proteins, carbs, veggies, whole_foods FROM records WHERE user_id = ? AND date = ?',
         (current_user.id, today)
     ).fetchone()
     
@@ -148,17 +203,24 @@ def add_record():
         # Update existing record
         new_amount = record[nutrient_type] + amount
         if new_amount < 0: new_amount = 0
+        
+        new_wf = (record['whole_foods'] or 0)
+        if is_whole_food:
+            new_wf += amount
+            if new_wf < 0: new_wf = 0
+            
         conn.execute(
-            f'UPDATE records SET {nutrient_type} = ? WHERE id = ?',
-            (new_amount, record['id'])
+            f'UPDATE records SET {nutrient_type} = ?, whole_foods = ? WHERE id = ?',
+            (new_amount, new_wf, record['id'])
         )
     else:
         # Create new record
         if amount < 0: amount = 0
         p, c, v = (amount, 0, 0) if nutrient_type == 'proteins' else (0, amount, 0) if nutrient_type == 'carbs' else (0, 0, amount)
+        wf = amount if is_whole_food else 0
         conn.execute(
-            'INSERT INTO records (user_id, date, proteins, carbs, veggies) VALUES (?, ?, ?, ?, ?)',
-            (current_user.id, today, p, c, v)
+            'INSERT INTO records (user_id, date, proteins, carbs, veggies, whole_foods) VALUES (?, ?, ?, ?, ?, ?)',
+            (current_user.id, today, p, c, v, wf)
         )
         
     conn.commit()

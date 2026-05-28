@@ -4,122 +4,151 @@
 
 {% block content %}
 <div class="row g-4">
-    <!-- Left Column: Quick Record -->
-    <div class="col-lg-5">
-        <!-- F-01: Quick Record -->
-        <div class="card shadow-sm border-0 rounded-4 mb-4">
+    <!-- Left Column: Quick Record & Prototype Foods -->
+    <div class="col-lg-6">
+        <!-- F-01: Quick Record (飲食快速紀錄) -->
+        <div class="card glass-card hover-shadow mb-4">
             <div class="card-body p-4">
-                <h4 class="fw-bold mb-4"><i class="bi bi-plus-circle me-2 text-success"></i>快速紀錄</h4>
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-success bg-opacity-10 text-success p-2 rounded-3 me-3">
+                        <i class="bi bi-plus-circle-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">快速紀錄</h4>
+                        <small class="text-muted">點擊按鈕直接增減今日攝取份數</small>
+                    </div>
+                </div>
                 
-                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded-3">
+                <!-- Protein Row -->
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-protein-light rounded-4 border border-white border-opacity-50">
                     <div class="d-flex align-items-center">
-                        <div class="bg-protein rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <div class="bg-protein icon-circle me-3">
                             <i class="bi bi-egg-fried"></i>
                         </div>
-                        <h5 class="mb-0 fw-bold">蛋白質</h5>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">蛋白質</h5>
+                            <small class="text-muted">目標：3 份 (如：蛋、豆腐、肉類)</small>
+                        </div>
                     </div>
-                    <div>
-                        <button class="btn btn-outline-protein btn-sm rounded-pill px-3" onclick="addNutrient('proteins', -1)">-1</button>
-                        <span class="mx-2 fw-bold fs-5 color-protein" id="val-proteins">0</span>
-                        <button class="btn btn-protein btn-sm rounded-pill px-3 shadow-sm" onclick="addNutrient('proteins', 1)">+1</button>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-protein btn-rounded btn-sm py-1 px-3 me-2" onclick="addNutrient('proteins', -1)">-1</button>
+                        <span class="mx-2 fw-bold fs-4 color-protein" id="val-proteins" style="min-width: 25px; text-align: center;">0</span>
+                        <button class="btn btn-protein btn-rounded btn-sm py-1 px-3 shadow-sm ms-2" onclick="addNutrient('proteins', 1)">+1</button>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded-3">
+                <!-- Carbs Row -->
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-carb-light rounded-4 border border-white border-opacity-50">
                     <div class="d-flex align-items-center">
-                        <div class="bg-carb rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <div class="bg-carb icon-circle me-3">
                             <i class="bi bi-basket2-fill"></i>
                         </div>
-                        <h5 class="mb-0 fw-bold">澱粉</h5>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">澱粉</h5>
+                            <small class="text-muted">目標：2 份 (如：地瓜、糙米、燕麥)</small>
+                        </div>
                     </div>
-                    <div>
-                        <button class="btn btn-outline-carb btn-sm rounded-pill px-3" onclick="addNutrient('carbs', -1)">-1</button>
-                        <span class="mx-2 fw-bold fs-5 color-carb" id="val-carbs">0</span>
-                        <button class="btn btn-carb btn-sm rounded-pill px-3 shadow-sm" onclick="addNutrient('carbs', 1)">+1</button>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-carb btn-rounded btn-sm py-1 px-3 me-2" onclick="addNutrient('carbs', -1)">-1</button>
+                        <span class="mx-2 fw-bold fs-4 color-carb" id="val-carbs" style="min-width: 25px; text-align: center;">0</span>
+                        <button class="btn btn-carb btn-rounded btn-sm py-1 px-3 shadow-sm ms-2" onclick="addNutrient('carbs', 1)">+1</button>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+                <!-- Veggies Row -->
+                <div class="d-flex justify-content-between align-items-center p-3 bg-veggie-light rounded-4 border border-white border-opacity-50">
                     <div class="d-flex align-items-center">
-                        <div class="bg-veggie rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <div class="bg-veggie icon-circle me-3">
                             <i class="bi bi-flower1"></i>
                         </div>
-                        <h5 class="mb-0 fw-bold">蔬果</h5>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">蔬果</h5>
+                            <small class="text-muted">目標：5 份 (如：深綠色蔬菜、芭樂)</small>
+                        </div>
                     </div>
-                    <div>
-                        <button class="btn btn-outline-veggie btn-sm rounded-pill px-3" onclick="addNutrient('veggies', -1)">-1</button>
-                        <span class="mx-2 fw-bold fs-5 color-veggie" id="val-veggies">0</span>
-                        <button class="btn btn-veggie btn-sm rounded-pill px-3 shadow-sm" onclick="addNutrient('veggies', 1)">+1</button>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-veggie btn-rounded btn-sm py-1 px-3 me-2" onclick="addNutrient('veggies', -1)">-1</button>
+                        <span class="mx-2 fw-bold fs-4 color-veggie" id="val-veggies" style="min-width: 25px; text-align: center;">0</span>
+                        <button class="btn btn-veggie btn-rounded btn-sm py-1 px-3 shadow-sm ms-2" onclick="addNutrient('veggies', 1)">+1</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- F-02: Whole Food Shortcuts -->
-        <div class="card shadow-sm border-0 rounded-4">
+        <!-- F-02: Whole Food Shortcuts (原型食物快捷鍵) -->
+        <div class="card glass-card hover-shadow">
             <div class="card-body p-4">
-                <h4 class="fw-bold mb-4"><i class="bi bi-lightning-charge me-2 text-warning"></i>原型食物快捷鍵</h4>
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-warning bg-opacity-10 text-warning p-2 rounded-3 me-3">
+                        <i class="bi bi-lightning-charge-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">原型食物快捷鍵</h4>
+                        <small class="text-muted">一鍵記錄常見優質原型食物（會獲得獎勵點數喔！）</small>
+                    </div>
+                </div>
+                
                 <div class="row g-3">
-                    <div class="col-6">
-                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('proteins', 1)">
-                            <div class="fs-4 mb-2">🍗</div>
-                            <div class="fw-bold">雞胸肉</div>
-                            <small class="text-muted">+1 蛋白質</small>
+                    <div class="col-sm-6">
+                        <button class="btn shortcut-btn w-100 text-start p-3 hover-shadow" onclick="addNutrient('proteins', 1, true)">
+                            <div class="fs-3 mb-2">🍗</div>
+                            <div class="fw-bold text-dark">雞胸肉</div>
+                            <small class="text-muted d-block">+1 份蛋白質</small>
                         </button>
                     </div>
-                    <div class="col-6">
-                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('carbs', 1)">
-                            <div class="fs-4 mb-2">🍠</div>
-                            <div class="fw-bold">地瓜</div>
-                            <small class="text-muted">+1 澱粉</small>
+                    <div class="col-sm-6">
+                        <button class="btn shortcut-btn w-100 text-start p-3 hover-shadow" onclick="addNutrient('carbs', 1, true)">
+                            <div class="fs-3 mb-2">🍠</div>
+                            <div class="fw-bold text-dark">地瓜</div>
+                            <small class="text-muted d-block">+1 份澱粉</small>
                         </button>
                     </div>
-                    <div class="col-6">
-                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('proteins', 1)">
-                            <div class="fs-4 mb-2">🥛</div>
-                            <div class="fw-bold">無糖豆漿</div>
-                            <small class="text-muted">+1 蛋白質</small>
+                    <div class="col-sm-6">
+                        <button class="btn shortcut-btn w-100 text-start p-3 hover-shadow" onclick="addNutrient('proteins', 1, true)">
+                            <div class="fs-3 mb-2">🥛</div>
+                            <div class="fw-bold text-dark">無糖豆漿</div>
+                            <small class="text-muted d-block">+1 份蛋白質</small>
                         </button>
                     </div>
-                    <div class="col-6">
-                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('veggies', 1)">
-                            <div class="fs-4 mb-2">🥦</div>
-                            <div class="fw-bold">燙青菜</div>
-                            <small class="text-muted">+1 蔬果</small>
+                    <div class="col-sm-6">
+                        <button class="btn shortcut-btn w-100 text-start p-3 hover-shadow" onclick="addNutrient('veggies', 1, true)">
+                            <div class="fs-3 mb-2">🥦</div>
+                            <div class="fw-bold text-dark">燙青菜</div>
+                            <small class="text-muted d-block">+1 份蔬果</small>
                         </button>
                     </div>
-                    <div class="col-6">
-                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('veggies', 1)">
-                            <div class="fs-4 mb-2">🍎</div>
-                            <div class="fw-bold">蘋果</div>
-                            <small class="text-muted">+1 蔬果</small>
+                    <div class="col-sm-6">
+                        <button class="btn shortcut-btn w-100 text-start p-3 hover-shadow" onclick="addNutrient('veggies', 1, true)">
+                            <div class="fs-3 mb-2">🍎</div>
+                            <div class="fw-bold text-dark">蘋果</div>
+                            <small class="text-muted d-block">+1 份蔬果</small>
                         </button>
                     </div>
-                    <div class="col-6">
-                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('veggies', 1)">
-                            <div class="fs-4 mb-2">🍌</div>
-                            <div class="fw-bold">香蕉</div>
-                            <small class="text-muted">+1 蔬果</small>
+                    <div class="col-sm-6">
+                        <button class="btn shortcut-btn w-100 text-start p-3 hover-shadow" onclick="addNutrient('veggies', 1, true)">
+                            <div class="fs-3 mb-2">🍌</div>
+                            <div class="fw-bold text-dark">香蕉</div>
+                            <small class="text-muted d-block">+1 份蔬果</small>
                         </button>
                     </div>
-                    <div class="col-6">
-                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('proteins', 1)">
-                            <div class="fs-4 mb-2">🥚</div>
-                            <div class="fw-bold">雞蛋</div>
-                            <small class="text-muted">+1 蛋白質</small>
+                    <div class="col-sm-6">
+                        <button class="btn shortcut-btn w-100 text-start p-3 hover-shadow" onclick="addNutrient('proteins', 1, true)">
+                            <div class="fs-3 mb-2">🥚</div>
+                            <div class="fw-bold text-dark">雞蛋</div>
+                            <small class="text-muted d-block">+1 份蛋白質</small>
                         </button>
                     </div>
-                    <div class="col-6">
-                        <button class="btn btn-light w-100 text-start p-3 border rounded-3 hover-shadow" onclick="addNutrient('proteins', 1)">
-                            <div class="fs-4 mb-2">🥜</div>
-                            <div class="fw-bold">堅果</div>
-                            <small class="text-muted">+1 蛋白質</small>
+                    <div class="col-sm-6">
+                        <button class="btn shortcut-btn w-100 text-start p-3 hover-shadow" onclick="addNutrient('proteins', 1, true)">
+                            <div class="fs-3 mb-2">🥜</div>
+                            <div class="fw-bold text-dark">堅果</div>
+                            <small class="text-muted d-block">+1 份蛋白質</small>
                         </button>
                     </div>
                     <!-- Custom Food Button -->
                     <div class="col-12 mt-3">
-                        <button class="btn btn-outline-primary w-100 p-3 rounded-pill hover-shadow fw-bold border-2" data-bs-toggle="modal" data-bs-target="#customFoodModal">
-                            <i class="bi bi-pencil-square me-2"></i>自己輸入想吃的食物
+                        <button class="btn btn-outline-success w-100 py-3 rounded-4 hover-shadow fw-bold border-2" data-bs-toggle="modal" data-bs-target="#customFoodModal">
+                            <i class="bi bi-pencil-square me-2"></i>自己輸入想吃的食物 / 自訂紀錄
                         </button>
                     </div>
                 </div>
@@ -127,16 +156,97 @@
         </div>
     </div>
 
-    <!-- Right Column: Dashboard F-03 -->
-    <div class="col-lg-7">
-        <div class="card shadow-sm border-0 rounded-4 h-100">
-            <div class="card-body p-4 d-flex flex-column">
-                <h4 class="fw-bold mb-4"><i class="bi bi-pie-chart-fill me-2 text-primary"></i>今日營養儀表板</h4>
-                <div class="flex-grow-1 d-flex justify-content-center align-items-center" style="min-height: 300px;">
-                    <canvas id="nutritionChart" style="max-width: 400px; max-height: 400px;"></canvas>
+    <!-- Right Column: Dashboard F-03 & Reward Widget -->
+    <div class="col-lg-6">
+        <!-- F-03: Nutrition Dashboard (今日營養儀表板) -->
+        <div class="card glass-card hover-shadow mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-3 me-3">
+                        <i class="bi bi-pie-chart-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">今日營養儀表板</h4>
+                        <small class="text-muted">即時回饋與理想比例對照</small>
+                    </div>
                 </div>
-                <div class="mt-4 text-center">
-                    <p class="text-muted mb-0">理想比例參考：蛋白質 30% / 澱粉 20% / 蔬果 50%</p>
+                
+                <!-- Chart Row -->
+                <div class="row align-items-center g-3 mb-4">
+                    <div class="col-sm-6 d-flex justify-content-center">
+                        <div class="chart-container" style="position: relative; height:200px; width:200px">
+                            <canvas id="nutritionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <!-- Progress trackers -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-dark"><i class="bi bi-egg-fried color-protein me-1"></i>蛋白質</span>
+                                <span class="fw-bold text-muted" id="progress-text-proteins">0 / 3 份</span>
+                            </div>
+                            <div class="progress">
+                                <div id="progress-bar-proteins" class="progress-bar bg-protein" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-dark"><i class="bi bi-basket2-fill color-carb me-1"></i>澱粉</span>
+                                <span class="fw-bold text-muted" id="progress-text-carbs">0 / 2 份</span>
+                            </div>
+                            <div class="progress">
+                                <div id="progress-bar-carbs" class="progress-bar bg-carb" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-dark"><i class="bi bi-flower1 color-veggie me-1"></i>蔬果</span>
+                                <span class="fw-bold text-muted" id="progress-text-veggies">0 / 5 份</span>
+                            </div>
+                            <div class="progress">
+                                <div id="progress-bar-veggies" class="progress-bar bg-veggie" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Achievement Message -->
+                <div id="achievement-banner" class="alert alert-light border rounded-4 p-3 d-flex align-items-center mb-0">
+                    <div class="fs-1 me-3">🍽️</div>
+                    <div>
+                        <h6 class="fw-bold mb-1" id="achievement-title">今日飲食紀錄中</h6>
+                        <small class="text-muted" id="achievement-desc">點選上方按鈕開始記錄您的第一餐！</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Goal 3: Whole Food Reward Mechanism (原型食物獎勵機制) -->
+        <div class="card glass-card hover-shadow reward-panel">
+            <div class="card-body p-2">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning text-white p-2 rounded-3 me-3 shadow-sm" style="background: var(--whole-food-gradient) !important;">
+                            <i class="bi bi-award-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0">原型食物獎勵星級</h4>
+                            <small class="text-muted">優先攝取少加工之原型食物</small>
+                        </div>
+                    </div>
+                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold" id="badge-points">0 點</span>
+                </div>
+                
+                <div class="text-center py-3">
+                    <div class="star-rating mb-2" id="star-rating-container">
+                        <i class="bi bi-star-fill star-empty"></i>
+                        <i class="bi bi-star-fill star-empty"></i>
+                        <i class="bi bi-star-fill star-empty"></i>
+                        <i class="bi bi-star-fill star-empty"></i>
+                        <i class="bi bi-star-fill star-empty"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mt-2" id="reward-level-title">🌱 萌芽階段</h5>
+                    <p class="text-muted mb-0" id="reward-level-desc">多吃地瓜、雞胸肉、蔬菜等原型食物，解鎖健康勳章！</p>
                 </div>
             </div>
         </div>
@@ -147,7 +257,7 @@
 <div class="modal fade" id="customFoodModal" tabindex="-1" aria-labelledby="customFoodModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4">
-      <div class="modal-header bg-primary text-white rounded-top-4 border-0">
+      <div class="modal-header bg-success text-white rounded-top-4 border-0 p-4">
         <h5 class="modal-title fw-bold" id="customFoodModalLabel"><i class="bi bi-pencil-square me-2"></i>新增自訂食物</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -155,11 +265,11 @@
         <form id="customFoodForm">
             <div class="mb-3">
                 <label for="customFoodName" class="form-label fw-bold">食物名稱</label>
-                <input type="text" class="form-control" id="customFoodName" placeholder="例如：燕麥奶、鮭魚..." required>
+                <input type="text" class="form-control form-control-lg rounded-3 border-2" id="customFoodName" placeholder="例如：燕麥奶、沙拉、水煮蛋..." required>
             </div>
             <div class="mb-3">
                 <label for="customFoodCategory" class="form-label fw-bold">主要營養類別</label>
-                <select class="form-select" id="customFoodCategory" required>
+                <select class="form-select form-select-lg rounded-3 border-2" id="customFoodCategory" required>
                     <option value="" disabled selected>請選擇類別...</option>
                     <option value="proteins">蛋白質</option>
                     <option value="carbs">澱粉</option>
@@ -168,19 +278,35 @@
             </div>
             <div class="mb-3">
                 <label for="customFoodAmount" class="form-label fw-bold">份數</label>
-                <div class="input-group">
-                    <input type="number" class="form-control" id="customFoodAmount" value="1" min="0.5" step="0.5" required>
-                    <span class="input-group-text bg-light">份</span>
+                <div class="input-group input-group-lg">
+                    <input type="number" class="form-control border-2" id="customFoodAmount" value="1" min="0.5" step="0.5" required>
+                    <span class="input-group-text bg-light border-2">份</span>
                 </div>
+            </div>
+            <div class="mb-3 form-check form-switch p-3 bg-light rounded-3 ms-0">
+                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="customFoodIsWhole" checked>
+                <label class="form-check-label fw-bold text-dark" for="customFoodIsWhole">此項為「原型食物」</label>
             </div>
         </form>
       </div>
       <div class="modal-footer border-0 px-4 pb-4 pt-0">
-        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="submitCustomFood()">新增紀錄</button>
+        <button type="button" class="btn btn-light btn-rounded px-4" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-success btn-rounded px-4 shadow-sm" onclick="submitCustomFood()">新增紀錄</button>
       </div>
     </div>
   </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="position-fixed bottom-0 end-0 p-3 toast-container">
+    <div id="liveToast" class="toast align-items-center text-white bg-success border-0 rounded-4 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex p-2">
+            <div class="toast-body fw-bold fs-6">
+                <i class="bi bi-check-circle-fill me-2"></i><span id="toast-message">紀錄成功！</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
