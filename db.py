@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-DATABASE = 'database.db'
+DATABASE = 'nutrition_helper.db'
 
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
@@ -11,7 +11,7 @@ def get_db_connection():
 def init_db():
     if not os.path.exists(DATABASE):
         connection = get_db_connection()
-        with open('schema.sql') as f:
+        with open('schema.sql', 'r', encoding='utf-8') as f:
             connection.executescript(f.read())
         connection.commit()
         connection.close()

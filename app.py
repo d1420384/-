@@ -7,7 +7,10 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dev-secret-key' # In production, use a strong random secret key
-DATABASE = 'database.db'
+DATABASE = 'nutrition_helper.db'
+
+from auth import auth_bp
+app.register_blueprint(auth_bp)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -52,7 +55,7 @@ def history():
     conn = get_db_connection()
     # Get the last 7 days of records
     records = conn.execute(
-        'SELECT date, proteins, carbs, veggies FROM records WHERE user_id = ? ORDER BY date DESC LIMIT 7',
+        'SELECT record_date AS date, protein_slots AS proteins, carb_slots AS carbs, veg_slots AS veggies FROM diet_records WHERE user_id = ? ORDER BY record_date DESC LIMIT 7',
         (current_user.id,)
     ).fetchall()
     conn.close()
@@ -117,7 +120,7 @@ def get_today_stats():
     today = datetime.date.today().isoformat()
     conn = get_db_connection()
     record = conn.execute(
-        'SELECT proteins, carbs, veggies FROM records WHERE user_id = ? AND date = ?',
+        'SELECT protein_slots AS proteins, carb_slots AS carbs, veg_slots AS veggies FROM diet_records WHERE user_id = ? AND record_date = ?',
         (current_user.id, today)
     ).fetchone()
     conn.close()
@@ -137,19 +140,26 @@ def add_record():
     if nutrient_type not in ['proteins', 'carbs', 'veggies']:
         return jsonify({'error': 'Invalid nutrient type'}), 400
         
+    nutrient_map = {
+        'proteins': 'protein_slots',
+        'carbs': 'carb_slots',
+        'veggies': 'veg_slots'
+    }
+    db_col = nutrient_map[nutrient_type]
+        
     today = datetime.date.today().isoformat()
     conn = get_db_connection()
     record = conn.execute(
-        'SELECT id, proteins, carbs, veggies FROM records WHERE user_id = ? AND date = ?',
+        'SELECT id, protein_slots, carb_slots, veg_slots FROM diet_records WHERE user_id = ? AND record_date = ?',
         (current_user.id, today)
     ).fetchone()
     
     if record:
         # Update existing record
-        new_amount = record[nutrient_type] + amount
+        new_amount = record[db_col] + amount
         if new_amount < 0: new_amount = 0
         conn.execute(
-            f'UPDATE records SET {nutrient_type} = ? WHERE id = ?',
+            f'UPDATE diet_records SET {db_col} = ? WHERE id = ?',
             (new_amount, record['id'])
         )
     else:
@@ -157,7 +167,7 @@ def add_record():
         if amount < 0: amount = 0
         p, c, v = (amount, 0, 0) if nutrient_type == 'proteins' else (0, amount, 0) if nutrient_type == 'carbs' else (0, 0, amount)
         conn.execute(
-            'INSERT INTO records (user_id, date, proteins, carbs, veggies) VALUES (?, ?, ?, ?, ?)',
+            'INSERT INTO diet_records (user_id, record_date, protein_slots, carb_slots, veg_slots) VALUES (?, ?, ?, ?, ?)',
             (current_user.id, today, p, c, v)
         )
         
