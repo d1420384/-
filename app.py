@@ -36,6 +36,20 @@ def init_db():
         # Migration: Add missing columns if database already exists
         conn = get_db_connection()
         try:
+            # Create food_shortcuts table if not exists
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS food_shortcuts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    name TEXT NOT NULL,
+                    emoji TEXT NOT NULL DEFAULT '🥗',
+                    proteins REAL DEFAULT 0.0,
+                    carbs REAL DEFAULT 0.0,
+                    veggies REAL DEFAULT 0.0,
+                    clean_score INTEGER DEFAULT 10,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )
+            ''')
             cursor = conn.cursor()
             # Check users table
             cursor.execute("PRAGMA table_info(users)")
@@ -46,6 +60,12 @@ def init_db():
                 conn.execute("ALTER TABLE users ADD COLUMN target_carbs REAL DEFAULT 2.0")
             if 'target_veggies' not in cols:
                 conn.execute("ALTER TABLE users ADD COLUMN target_veggies REAL DEFAULT 5.0")
+            
+            # Check food_shortcuts table
+            cursor.execute("PRAGMA table_info(food_shortcuts)")
+            cols_f = [row['name'] for row in cursor.fetchall()]
+            if 'click_count' not in cols_f:
+                conn.execute("ALTER TABLE food_shortcuts ADD COLUMN click_count INTEGER DEFAULT 0")
             
             # Check records table
             cursor.execute("PRAGMA table_info(records)")
@@ -211,6 +231,138 @@ def get_today_stats():
         })
 
 # ==========================================
+# 功能編號：F-02 原型食物快捷鍵模組
+# 負責組員：邱瀞賢
+# 說明：處理原型食物快捷鍵設定與 CRUD 的後端 API 與頁面路由。
+# ==========================================
+DEFAULT_SHORTCUTS = [
+    {"name": "雞胸肉", "emoji": "🍗", "proteins": 1.0, "carbs": 0.0, "veggies": 0.0, "clean_score": 10},
+    {"name": "地瓜", "emoji": "🍠", "proteins": 0.0, "carbs": 1.0, "veggies": 0.0, "clean_score": 10},
+    {"name": "無糖豆漿", "emoji": "🥛", "proteins": 1.0, "carbs": 0.0, "veggies": 0.0, "clean_score": 10},
+    {"name": "燙青菜", "emoji": "🥦", "proteins": 0.0, "carbs": 0.0, "veggies": 1.0, "clean_score": 10},
+    {"name": "蘋果", "emoji": "🍎", "proteins": 0.0, "carbs": 0.0, "veggies": 1.0, "clean_score": 10},
+    {"name": "香蕉", "emoji": "🍌", "proteins": 0.0, "carbs": 0.0, "veggies": 1.0, "clean_score": 10},
+    {"name": "雞蛋", "emoji": "🥚", "proteins": 1.0, "carbs": 0.0, "veggies": 0.0, "clean_score": 10},
+    {"name": "堅果", "emoji": "🥜", "proteins": 1.0, "carbs": 0.0, "veggies": 0.0, "clean_score": 10},
+    {"name": "鮭魚排", "emoji": "🐟", "proteins": 1.5, "carbs": 0.0, "veggies": 0.0, "clean_score": 10},
+    {"name": "糙米飯", "emoji": "🍚", "proteins": 0.0, "carbs": 1.5, "veggies": 0.0, "clean_score": 10},
+    {"name": "板豆腐", "emoji": "🍲", "proteins": 1.0, "carbs": 0.0, "veggies": 0.0, "clean_score": 10},
+    {"name": "沙朗牛排", "emoji": "🥩", "proteins": 2.0, "carbs": 0.0, "veggies": 0.0, "clean_score": 10},
+    {"name": "大燕麥片", "emoji": "🥣", "proteins": 0.0, "carbs": 1.0, "veggies": 0.0, "clean_score": 10},
+    {"name": "新鮮酪梨", "emoji": "🥑", "proteins": 0.0, "carbs": 0.0, "veggies": 1.0, "clean_score": 10},
+    {"name": "奇異果", "emoji": "🥝", "proteins": 0.0, "carbs": 0.0, "veggies": 1.0, "clean_score": 10},
+    {"name": "新鮮藍莓", "emoji": "🫐", "proteins": 0.0, "carbs": 0.0, "veggies": 1.0, "clean_score": 10},
+    {"name": "水煮鮮蝦", "emoji": "🍤", "proteins": 1.0, "carbs": 0.0, "veggies": 0.0, "clean_score": 10},
+    {"name": "蒸馬鈴薯", "emoji": "🥔", "proteins": 0.0, "carbs": 1.0, "veggies": 0.0, "clean_score": 10}
+]
+
+def init_user_shortcuts(user_id):
+    conn = get_db_connection()
+    existing = conn.execute("SELECT id FROM food_shortcuts WHERE user_id = ?", (user_id,)).fetchone()
+    if not existing:
+        for s in DEFAULT_SHORTCUTS:
+            conn.execute(
+                "INSERT INTO food_shortcuts (user_id, name, emoji, proteins, carbs, veggies, clean_score) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (user_id, s["name"], s["emoji"], s["proteins"], s["carbs"], s["veggies"], s["clean_score"])
+            )
+        conn.commit()
+    conn.close()
+
+@app.route('/shortcuts')
+@login_required
+def shortcuts_page():
+    return render_template('shortcuts.html')
+
+@app.route('/api/shortcuts', methods=['GET'])
+@login_required
+def get_shortcuts():
+    init_user_shortcuts(current_user.id)
+    conn = get_db_connection()
+    shortcuts = conn.execute(
+        "SELECT id, name, emoji, proteins, carbs, veggies, clean_score, click_count FROM food_shortcuts WHERE user_id = ? ORDER BY click_count DESC, id ASC",
+        (current_user.id,)
+    ).fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in shortcuts])
+
+@app.route('/api/shortcuts', methods=['POST'])
+@login_required
+def add_shortcut():
+    data = request.get_json()
+    name = data.get('name')
+    emoji = data.get('emoji', '🥗')
+    proteins = float(data.get('proteins', 0.0))
+    carbs = float(data.get('carbs', 0.0))
+    veggies = float(data.get('veggies', 0.0))
+    clean_score = int(data.get('clean_score', 10))
+    
+    if not name:
+        return jsonify({'error': 'Food name is required'}), 400
+        
+    conn = get_db_connection()
+    conn.execute(
+        "INSERT INTO food_shortcuts (user_id, name, emoji, proteins, carbs, veggies, clean_score) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (current_user.id, name, emoji, proteins, carbs, veggies, clean_score)
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+@app.route('/api/shortcuts/edit', methods=['POST'])
+@login_required
+def edit_shortcut():
+    data = request.get_json()
+    shortcut_id = data.get('id')
+    name = data.get('name')
+    emoji = data.get('emoji')
+    proteins = float(data.get('proteins', 0.0))
+    carbs = float(data.get('carbs', 0.0))
+    veggies = float(data.get('veggies', 0.0))
+    clean_score = int(data.get('clean_score', 10))
+    
+    if not shortcut_id or not name:
+        return jsonify({'error': 'Shortcut ID and name are required'}), 400
+        
+    conn = get_db_connection()
+    existing = conn.execute("SELECT id FROM food_shortcuts WHERE id = ? AND user_id = ?", (shortcut_id, current_user.id)).fetchone()
+    if not existing:
+        conn.close()
+        return jsonify({'error': 'Shortcut not found'}), 404
+        
+    conn.execute(
+        "UPDATE food_shortcuts SET name = ?, emoji = ?, proteins = ?, carbs = ?, veggies = ?, clean_score = ? WHERE id = ? AND user_id = ?",
+        (name, emoji, proteins, carbs, veggies, clean_score, shortcut_id, current_user.id)
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+@app.route('/api/shortcuts/delete', methods=['POST'])
+@login_required
+def delete_shortcut():
+    data = request.get_json()
+    shortcut_id = data.get('id')
+    
+    if not shortcut_id:
+        return jsonify({'error': 'Shortcut ID is required'}), 400
+        
+    conn = get_db_connection()
+    conn.execute("DELETE FROM food_shortcuts WHERE id = ? AND user_id = ?", (shortcut_id, current_user.id))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+@app.route('/api/shortcuts/reset', methods=['POST'])
+@login_required
+def reset_shortcuts():
+    conn = get_db_connection()
+    conn.execute("DELETE FROM food_shortcuts WHERE user_id = ?", (current_user.id,))
+    conn.commit()
+    conn.close()
+    init_user_shortcuts(current_user.id)
+    return jsonify({'success': True})
+
+# ==========================================
 # 功能編號：F-01 飲食紀錄核心邏輯
 # 負責組員：李宜蓁
 # 說明：負責處理蛋白質、澱粉、蔬果份數加減的後端路由與 SQLite 資料庫寫入邏輯。
@@ -238,6 +390,13 @@ def add_record():
         c_add = float(data.get('carbs', 0.0))
         v_add = float(data.get('veggies', 0.0))
         clean_bonus = int(data.get('clean_bonus', 0))
+        shortcut_id = data.get('shortcut_id')
+        
+        if shortcut_id:
+            conn.execute(
+                'UPDATE food_shortcuts SET click_count = click_count + 1 WHERE id = ? AND user_id = ?',
+                (shortcut_id, current_user.id)
+            )
         
         if record:
             new_p = max(0.0, record['proteins'] + p_add)
