@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('nutritionChart')) {
         initChart();
         fetchTodayStats();
+        loadHomeShortcuts();
     }
 
     // 複合型食物關鍵字比對預設比例庫
@@ -642,3 +643,86 @@ function analyzeSideDishes(text) {
         items: detectedItems
     };
 }
+
+function loadHomeShortcuts() {
+    const container = document.getElementById('shortcuts-container');
+    if (!container) return;
+    
+    fetch('/api/shortcuts')
+        .then(res => res.json())
+        .then(data => {
+            container.innerHTML = '';
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-3">
+                        <small class="text-muted">沒有自訂快捷鍵，請點選右上角「快捷鍵設定」進行設定！</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            data.forEach(item => {
+                const col = document.createElement('div');
+                col.className = 'col-sm-6';
+                
+                let portionsDesc = [];
+                if (item.proteins > 0) portionsDesc.push(`+${item.proteins.toFixed(1)} 蛋白質`);
+                if (item.carbs > 0) portionsDesc.push(`+${item.carbs.toFixed(1)} 澱粉`);
+                if (item.veggies > 0) portionsDesc.push(`+${item.veggies.toFixed(1)} 蔬果`);
+                const descStr = portionsDesc.join('、') || '無設定';
+
+                col.innerHTML = `
+                    <button class="food-card-btn d-flex align-items-center p-3 border hover-shadow" onclick='recordShortcutClick(${JSON.stringify(item).replace(/'/g, "\\'")})'>
+                        <span class="fs-2 me-3">${item.emoji}</span>
+                        <div class="text-start">
+                            <div class="fw-bold text-dark">${item.name}</div>
+                            <small class="text-muted d-block">${descStr}</small>
+                            <span class="badge bg-success bg-opacity-10 text-success font-monospace" style="font-size: 0.7rem;">⭐ 獎勵 +${item.clean_score}分</span>
+                        </div>
+                    </button>
+                `;
+                container.appendChild(col);
+            });
+        })
+        .catch(err => {
+            console.error('Error loading home shortcuts:', err);
+            container.innerHTML = `
+                <div class="col-12 text-center py-3 text-danger">
+                    <small>載入快捷鍵失敗</small>
+                </div>
+            `;
+        });
+}
+
+function recordShortcutClick(item) {
+    const dateInput = document.getElementById('selected-date');
+    const selectedDate = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+
+    fetch('/api/record', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            is_batch: true,
+            proteins: item.proteins,
+            carbs: item.carbs,
+            veggies: item.veggies,
+            clean_bonus: item.clean_score,
+            date: selectedDate
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            fetchTodayStats();
+            if (item.clean_score > 0) {
+                showRewardPopup(item.clean_score);
+            }
+        } else {
+            alert('紀錄失敗，請稍後再試');
+        }
+    })
+    .catch(error => console.error('Error saving shortcut record:', error));
+}
+

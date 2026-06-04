@@ -108,91 +108,32 @@
         <!-- F-02: Whole Food Shortcuts -->
         <div class="card glass-card border-0">
             <div class="card-body p-4">
-                <h4 class="fw-bold mb-4"><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>原型食物快捷鍵</h4>
-                <div class="row g-3">
-                    <div class="col-sm-6">
-                        <button class="food-card-btn d-flex align-items-center p-3 border hover-shadow" onclick="addNutrient('proteins', 1, 10)">
-                            <span class="fs-2 me-3">🍗</span>
-                            <div class="text-start">
-                                <div class="fw-bold text-dark">雞胸肉</div>
-                                <small class="text-muted d-block">+1 蛋白質</small>
-                                <span class="badge bg-success bg-opacity-10 text-success font-monospace" style="font-size: 0.7rem;">⭐ 獎勵 +10分</span>
-                            </div>
-                        </button>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold mb-0"><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>原型食物快捷鍵</h4>
+                    <a href="{{ url_for('shortcuts_page') }}" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 fw-bold">
+                        <i class="bi bi-gear-fill me-1"></i>快捷鍵設定
+                    </a>
+                </div>
+                <!-- Category Pills Filter -->
+                <div class="d-flex flex-wrap gap-2 mb-4" id="shortcut-filters">
+                    <button class="btn btn-filter btn-filter-all active" onclick="filterShortcuts('all')">全部</button>
+                    <button class="btn btn-filter btn-filter-protein" onclick="filterShortcuts('proteins')">🥩 蛋白質</button>
+                    <button class="btn btn-filter btn-filter-carb" onclick="filterShortcuts('carbs')">🍠 澱粉</button>
+                    <button class="btn btn-filter btn-filter-veggie" onclick="filterShortcuts('veggies')">🥦 蔬果</button>
+                </div>
+                <div class="row g-3" id="shortcuts-container">
+                    <!-- Loaded dynamically via JavaScript -->
+                    <div class="col-12 text-center py-4">
+                        <div class="spinner-border spinner-border-sm text-warning" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="text-muted ms-2">載入快捷鍵中...</span>
                     </div>
-                    <div class="col-sm-6">
-                        <button class="food-card-btn d-flex align-items-center p-3 border hover-shadow" onclick="addNutrient('carbs', 1, 10)">
-                            <span class="fs-2 me-3">🍠</span>
-                            <div class="text-start">
-                                <div class="fw-bold text-dark">地瓜</div>
-                                <small class="text-muted d-block">+1 澱粉</small>
-                                <span class="badge bg-success bg-opacity-10 text-success font-monospace" style="font-size: 0.7rem;">⭐ 獎勵 +10分</span>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-sm-6">
-                        <button class="food-card-btn d-flex align-items-center p-3 border hover-shadow" onclick="addNutrient('proteins', 1, 10)">
-                            <span class="fs-2 me-3">🥛</span>
-                            <div class="text-start">
-                                <div class="fw-bold text-dark">無糖豆漿</div>
-                                <small class="text-muted d-block">+1 蛋白質</small>
-                                <span class="badge bg-success bg-opacity-10 text-success font-monospace" style="font-size: 0.7rem;">⭐ 獎勵 +10分</span>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-sm-6">
-                        <button class="food-card-btn d-flex align-items-center p-3 border hover-shadow" onclick="addNutrient('veggies', 1, 10)">
-                            <span class="fs-2 me-3">🥦</span>
-                            <div class="text-start">
-                                <div class="fw-bold text-dark">燙青菜</div>
-                                <small class="text-muted d-block">+1 蔬果</small>
-                                <span class="badge bg-success bg-opacity-10 text-success font-monospace" style="font-size: 0.7rem;">⭐ 獎勵 +10分</span>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-sm-6">
-                        <button class="food-card-btn d-flex align-items-center p-3 border hover-shadow" onclick="addNutrient('veggies', 1, 10)">
-                            <span class="fs-2 me-3">🍎</span>
-                            <div class="text-start">
-                                <div class="fw-bold text-dark">蘋果</div>
-                                <small class="text-muted d-block">+1 蔬果</small>
-                                <span class="badge bg-success bg-opacity-10 text-success font-monospace" style="font-size: 0.7rem;">⭐ 獎勵 +10分</span>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-sm-6">
-                        <button class="food-card-btn d-flex align-items-center p-3 border hover-shadow" onclick="addNutrient('veggies', 1, 10)">
-                            <span class="fs-2 me-3">🍌</span>
-                            <div class="text-start">
-                                <div class="fw-bold text-dark">香蕉</div>
-                                <small class="text-muted d-block">+1 蔬果</small>
-                                <span class="badge bg-success bg-opacity-10 text-success font-monospace" style="font-size: 0.7rem;">⭐ 獎勵 +10分</span>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-sm-6">
-                        <button class="food-card-btn d-flex align-items-center p-3 border hover-shadow" onclick="addNutrient('proteins', 1, 10)">
-                            <span class="fs-2 me-3">🥚</span>
-                            <div class="text-start">
-                                <div class="fw-bold text-dark">雞蛋</div>
-                                <small class="text-muted d-block">+1 蛋白質</small>
-                                <span class="badge bg-success bg-opacity-10 text-success font-monospace" style="font-size: 0.7rem;">⭐ 獎勵 +10分</span>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="col-sm-6">
-                        <button class="food-card-btn d-flex align-items-center p-3 border hover-shadow" onclick="addNutrient('proteins', 1, 10)">
-                            <span class="fs-2 me-3">🥜</span>
-                            <div class="text-start">
-                                <div class="fw-bold text-dark">堅果</div>
-                                <small class="text-muted d-block">+1 蛋白質</small>
-                                <span class="badge bg-success bg-opacity-10 text-success font-monospace" style="font-size: 0.7rem;">⭐ 獎勵 +10分</span>
-                            </div>
-                        </button>
-                    </div>
-                    
-                    <!-- Custom Food Button -->
-                    <div class="col-12 mt-3">
+                </div>
+                
+                <!-- Custom Food Button -->
+                <div class="row mt-3">
+                    <div class="col-12">
                         <button class="btn btn-outline-success w-100 p-3 rounded-4 hover-shadow fw-bold border-2 d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#customFoodModal">
                             <i class="bi bi-pencil-square fs-5"></i> 自己輸入想吃的食物
                         </button>

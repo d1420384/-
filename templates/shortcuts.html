@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+
+{% block title %}快捷鍵設定 - 營養均衡小幫手{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="glass-card p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h3 class="fw-bold mb-1"><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>快捷鍵設定</h3>
+                <p class="text-muted mb-0">在這裡自訂您的常用原型食物快捷按鈕與對應份數</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary rounded-pill px-4" onclick="confirmResetShortcuts()">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>還原預設
+                </button>
+                <button class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addShortcutModal">
+                    <i class="bi bi-plus-lg me-1"></i>新增快捷食物
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Shortcuts Grid -->
+<div class="row g-4" id="shortcuts-grid">
+    <!-- Loaded dynamically by JS -->
+    <div class="col-12 text-center py-5" id="shortcuts-loading">
+        <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-2">載入快捷鍵中...</p>
+    </div>
+</div>
+
+<!-- Add Shortcut Modal -->
+<div class="modal fade" id="addShortcutModal" tabindex="-1" aria-labelledby="addShortcutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-success text-white rounded-top-4 border-0">
+        <h5 class="modal-title fw-bold" id="addShortcutModalLabel"><i class="bi bi-plus-lg me-2"></i>新增快捷食物</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form id="addShortcutForm">
+            <div class="mb-3">
+                <label for="addName" class="form-label fw-bold">食物名稱</label>
+                <input type="text" class="form-control target-input" id="addName" placeholder="例如：水煮蛋、烤鮭魚..." required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">選擇圖示 (Emoji)</label>
+                <div class="d-flex flex-wrap gap-2 mb-2 p-2 bg-light rounded-3 border" style="max-height: 120px; overflow-y: auto;" id="emoji-picker-add">
+                    <!-- Standard food emojis -->
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🍗')">🍗</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🍠')">🍠</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🥛')">🥛</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🥦')">🥦</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🍎')">🍎</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🍌')">🍌</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🥚')">🥚</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🥜')">🥜</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🥗')">🥗</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🥩')">🥩</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🐟')">🐟</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🍤')">🍤</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🍙')">🍙</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🥑')">🥑</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🌽')">🌽</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🥣')">🥣</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🍎')">🍎</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('add', '🥝')">🥝</span>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 fw-bold" id="addEmojiPreview">🥗</span>
+                    <input type="text" class="form-control target-input border-start-0" id="addEmoji" value="🥗" placeholder="或自行輸入一個 Emoji" required>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-4">
+                    <label for="addProteins" class="form-label fw-bold color-protein">🥩 蛋白質</label>
+                    <input type="number" class="form-control target-input" id="addProteins" value="0.0" min="0" max="10" step="0.5" required>
+                </div>
+                <div class="col-4">
+                    <label for="addCarbs" class="form-label fw-bold color-carb">🍠 澱粉</label>
+                    <input type="number" class="form-control target-input" id="addCarbs" value="0.0" min="0" max="10" step="0.5" required>
+                </div>
+                <div class="col-4">
+                    <label for="addVeggies" class="form-label fw-bold color-veggie">🥦 蔬果</label>
+                    <input type="number" class="form-control target-input" id="addVeggies" value="0.0" min="0" max="10" step="0.5" required>
+                </div>
+            </div>
+
+            <div class="mb-0 mt-3">
+                <label for="addCleanScore" class="form-label fw-bold text-primary"><i class="bi bi-star-fill text-warning me-1"></i>原型食物獎勵積分</label>
+                <div class="input-group">
+                    <input type="number" class="form-control target-input" id="addCleanScore" value="10" min="0" max="100" step="5" required>
+                    <span class="input-group-text bg-light border-0">分</span>
+                </div>
+                <div class="form-text">鼓勵優質健康的原型食物，吃下一份可額外獲得此積分。</div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer border-0 px-4 pb-4 pt-0">
+        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-success rounded-pill px-4 shadow-sm" onclick="submitAddShortcut()">新增</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Shortcut Modal -->
+<div class="modal fade" id="editShortcutModal" tabindex="-1" aria-labelledby="editShortcutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header bg-success text-white rounded-top-4 border-0">
+        <h5 class="modal-title fw-bold" id="editShortcutModalLabel"><i class="bi bi-pencil-square me-2"></i>編輯快捷食物</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form id="editShortcutForm">
+            <input type="hidden" id="editId">
+            <div class="mb-3">
+                <label for="editName" class="form-label fw-bold">食物名稱</label>
+                <input type="text" class="form-control target-input" id="editName" placeholder="例如：水煮蛋、烤鮭魚..." required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">選擇圖示 (Emoji)</label>
+                <div class="d-flex flex-wrap gap-2 mb-2 p-2 bg-light rounded-3 border" style="max-height: 120px; overflow-y: auto;" id="emoji-picker-edit">
+                    <!-- Standard food emojis -->
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🍗')">🍗</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🍠')">🍠</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🥛')">🥛</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🥦')">🥦</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🍎')">🍎</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🍌')">🍌</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🥚')">🥚</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🥜')">🥜</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🥗')">🥗</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🥩')">🥩</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🐟')">🐟</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🍤')">🍤</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🍙')">🍙</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🥑')">🥑</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🌽')">🌽</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🥣')">🥣</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🍎')">🍎</span>
+                    <span class="emoji-opt p-1 fs-3 rounded hover-bg-light cursor-pointer" onclick="selectEmoji('edit', '🥝')">🥝</span>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 fw-bold" id="editEmojiPreview">🥗</span>
+                    <input type="text" class="form-control target-input border-start-0" id="editEmoji" placeholder="或自行輸入一個 Emoji" required>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-4">
+                    <label for="editProteins" class="form-label fw-bold color-protein">🥩 蛋白質</label>
+                    <input type="number" class="form-control target-input" id="editProteins" min="0" max="10" step="0.5" required>
+                </div>
+                <div class="col-4">
+                    <label for="editCarbs" class="form-label fw-bold color-carb">🍠 澱粉</label>
+                    <input type="number" class="form-control target-input" id="editCarbs" min="0" max="10" step="0.5" required>
+                </div>
+                <div class="col-4">
+                    <label for="editVeggies" class="form-label fw-bold color-veggie">🥦 蔬果</label>
+                    <input type="number" class="form-control target-input" id="editVeggies" min="0" max="10" step="0.5" required>
+                </div>
+            </div>
+
+            <div class="mb-0 mt-3">
+                <label for="editCleanScore" class="form-label fw-bold text-primary"><i class="bi bi-star-fill text-warning me-1"></i>原型食物獎勵積分</label>
+                <div class="input-group">
+                    <input type="number" class="form-control target-input" id="editCleanScore" min="0" max="100" step="5" required>
+                    <span class="input-group-text bg-light border-0">分</span>
+                </div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer border-0 px-4 pb-4 pt-0">
+        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-success rounded-pill px-4 shadow-sm" onclick="submitEditShortcut()">儲存變更</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentShortcuts = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadShortcuts();
+
+        // Bind emoji inputs to their previews
+        const addEmojiInput = document.getElementById('addEmoji');
+        if (addEmojiInput) {
+            addEmojiInput.addEventListener('input', (e) => {
+                document.getElementById('addEmojiPreview').innerText = e.target.value.trim() || '🥗';
+            });
+        }
+
+        const editEmojiInput = document.getElementById('editEmoji');
+        if (editEmojiInput) {
+            editEmojiInput.addEventListener('input', (e) => {
+                document.getElementById('editEmojiPreview').innerText = e.target.value.trim() || '🥗';
+            });
+        }
+    });
+
+    function selectEmoji(mode, emoji) {
+        document.getElementById(mode + 'Emoji').value = emoji;
+        document.getElementById(mode + 'EmojiPreview').innerText = emoji;
+    }
+
+    function loadShortcuts() {
+        const grid = document.getElementById('shortcuts-grid');
+        
+        fetch('/api/shortcuts')
+            .then(res => res.json())
+            .then(data => {
+                currentShortcuts = data;
+                grid.innerHTML = '';
+                
+                if (data.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-12 text-center py-5">
+                            <i class="bi bi-lightning-charge text-muted fs-1 opacity-50"></i>
+                            <h5 class="fw-bold mt-3 text-dark">目前沒有設定任何快捷鍵</h5>
+                            <p class="text-muted">請點擊上方按鈕新增自訂快捷鍵，或還原成預設值！</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                data.forEach(item => {
+                    // Build portions description
+                    let portions = [];
+                    if (item.proteins > 0) portions.push(`🥩 蛋白質 +${item.proteins.toFixed(1)}`);
+                    if (item.carbs > 0) portions.push(`🍠 澱粉 +${item.carbs.toFixed(1)}`);
+                    if (item.veggies > 0) portions.push(`🥦 蔬果 +${item.veggies.toFixed(1)}`);
+                    if (portions.length === 0) portions.push('無營養設定');
+
+                    const col = document.createElement('div');
+                    col.className = 'col-md-6 col-lg-4 col-xl-3';
+                    col.innerHTML = `
+                        <div class="card glass-card h-100 hover-shadow border border-light p-3 position-relative">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <span class="fs-1 bg-light rounded-4 px-3 py-2 shadow-sm">${item.emoji}</span>
+                                <div class="text-start">
+                                    <h5 class="fw-bold mb-1 text-dark text-truncate" style="max-width: 140px;">${item.name}</h5>
+                                    <span class="badge bg-success bg-opacity-10 text-success font-monospace" style="font-size: 0.75rem;">⭐ 獎勵 +${item.clean_score}分</span>
+                                </div>
+                            </div>
+                            <div class="bg-light bg-opacity-50 p-2.5 rounded-3 border border-light text-start mb-3" style="font-size: 0.85rem;">
+                                <div class="text-muted fw-semibold mb-1">對應份數設定：</div>
+                                <div class="d-flex flex-column gap-1">
+                                    ${portions.map(p => `<span class="fw-medium">${p} 份</span>`).join('')}
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mt-auto">
+                                <button class="btn btn-outline-primary btn-sm rounded-pill flex-grow-1" onclick="openEditModal(${item.id})">
+                                    <i class="bi bi-pencil-fill me-1"></i>編輯
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm rounded-pill flex-grow-1" onclick="confirmDeleteShortcut(${item.id}, '${item.name}')">
+                                    <i class="bi bi-trash-fill me-1"></i>刪除
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(col);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                grid.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+                        <h5 class="fw-bold mt-3 text-dark">載入快捷鍵失敗</h5>
+                        <p class="text-muted">請稍後再試</p>
+                    </div>
+                `;
+            });
+    }
+
+    function submitAddShortcut() {
+        const name = document.getElementById('addName').value.trim();
+        const emoji = document.getElementById('addEmoji').value.trim();
+        const proteins = parseFloat(document.getElementById('addProteins').value) || 0.0;
+        const carbs = parseFloat(document.getElementById('addCarbs').value) || 0.0;
+        const veggies = parseFloat(document.getElementById('addVeggies').value) || 0.0;
+        const clean_score = parseInt(document.getElementById('addCleanScore').value) || 0;
+
+        if (!name) {
+            alert('請輸入食物名稱！');
+            return;
+        }
+
+        fetch('/api/shortcuts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, emoji, proteins, carbs, veggies, clean_score })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Close modal and reset form
+                const modalEl = document.getElementById('addShortcutModal');
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.hide();
+                document.getElementById('addShortcutForm').reset();
+                document.getElementById('addEmojiPreview').innerText = '🥗';
+                
+                loadShortcuts();
+            } else {
+                alert('新增失敗: ' + (data.error || '未知錯誤'));
+            }
+        })
+        .catch(err => alert('新增發生錯誤：' + err));
+    }
+
+    function openEditModal(id) {
+        const item = currentShortcuts.find(x => x.id === id);
+        if (!item) return;
+
+        document.getElementById('editId').value = item.id;
+        document.getElementById('editName').value = item.name;
+        document.getElementById('editEmoji').value = item.emoji;
+        document.getElementById('editEmojiPreview').innerText = item.emoji;
+        document.getElementById('editProteins').value = item.proteins;
+        document.getElementById('editCarbs').value = item.carbs;
+        document.getElementById('editVeggies').value = item.veggies;
+        document.getElementById('editCleanScore').value = item.clean_score;
+
+        const modalEl = document.getElementById('editShortcutModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+
+    function submitEditShortcut() {
+        const id = parseInt(document.getElementById('editId').value);
+        const name = document.getElementById('editName').value.trim();
+        const emoji = document.getElementById('editEmoji').value.trim();
+        const proteins = parseFloat(document.getElementById('editProteins').value) || 0.0;
+        const carbs = parseFloat(document.getElementById('editCarbs').value) || 0.0;
+        const veggies = parseFloat(document.getElementById('editVeggies').value) || 0.0;
+        const clean_score = parseInt(document.getElementById('editCleanScore').value) || 0;
+
+        if (!name) {
+            alert('請輸入食物名稱！');
+            return;
+        }
+
+        fetch('/api/shortcuts/edit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, name, emoji, proteins, carbs, veggies, clean_score })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const modalEl = document.getElementById('editShortcutModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+                loadShortcuts();
+            } else {
+                alert('儲存失敗: ' + (data.error || '未知錯誤'));
+            }
+        })
+        .catch(err => alert('編輯發生錯誤：' + err));
+    }
+
+    function confirmDeleteShortcut(id, name) {
+        if (confirm(`您確定要刪除「${name}」快捷鍵嗎？`)) {
+            fetch('/api/shortcuts/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadShortcuts();
+                } else {
+                    alert('刪除失敗');
+                }
+            })
+            .catch(err => alert('刪除錯誤：' + err));
+        }
+    }
+
+    function confirmResetShortcuts() {
+        if (confirm('您確定要將快捷鍵還原為系統預設值嗎？這將會清除您目前自訂的所有快捷按鈕！')) {
+            fetch('/api/shortcuts/reset', {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadShortcuts();
+                } else {
+                    alert('還原失敗');
+                }
+            })
+            .catch(err => alert('還原錯誤：' + err));
+        }
+    }
+</script>
+<style>
+    .emoji-opt {
+        cursor: pointer;
+        transition: transform 0.15s ease, background-color 0.15s ease;
+        display: inline-block;
+    }
+    .emoji-opt:hover {
+        transform: scale(1.2);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .p-2.5 {
+        padding: 0.65rem !important;
+    }
+</style>
+{% endblock %}
