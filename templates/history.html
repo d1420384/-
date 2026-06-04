@@ -14,6 +14,34 @@
     {% endif %}
 {% endfor %}
 
+<!-- F-04: Date Range Filter Form -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card glass-card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="GET" action="{{ url_for('history') }}" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="start_date" class="form-label fw-bold text-success mb-2"><i class="bi bi-calendar-event me-1"></i>開始日期</label>
+                        <div class="d-flex align-items-center bg-white bg-opacity-70 border rounded-pill px-3 py-2 shadow-sm">
+                            <input type="date" id="start_date" name="start_date" class="border-0 bg-transparent text-dark fw-bold font-monospace w-100" style="outline: none; font-size: 0.95rem;" value="{{ start_date }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="end_date" class="form-label fw-bold text-success mb-2"><i class="bi bi-calendar-event-fill me-1"></i>結束日期</label>
+                        <div class="d-flex align-items-center bg-white bg-opacity-70 border rounded-pill px-3 py-2 shadow-sm">
+                            <input type="date" id="end_date" name="end_date" class="border-0 bg-transparent text-dark fw-bold font-monospace w-100" style="outline: none; font-size: 0.95rem;" value="{{ end_date }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-success rounded-pill px-4 py-2 shadow-sm flex-grow-1 fw-bold"><i class="bi bi-search me-1"></i>查詢</button>
+                        <a href="{{ url_for('history') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2 flex-grow-1 fw-bold text-center"><i class="bi bi-arrow-clockwise me-1"></i>重設</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row g-4">
     <!-- Left Column: Statistics & Chart -->
     <div class="col-lg-8">
@@ -21,7 +49,20 @@
         <!-- F-04: Weekly Trend Chart -->
         <div class="card glass-card border-0 mb-4 shadow-sm">
             <div class="card-body p-4">
-                <h4 class="fw-bold mb-4"><i class="bi bi-bar-chart-fill text-success me-2"></i>營養攝取比例與趨勢 (過去七天)</h4>
+                <h4 class="fw-bold mb-4">
+                    <i class="bi bi-bar-chart-fill text-success me-2"></i>營養攝取比例與趨勢 
+                    <span class="fs-6 text-muted fw-normal">
+                        {% if start_date and end_date %}
+                            ({{ start_date }} ~ {{ end_date }})
+                        {% elif start_date %}
+                            ({{ start_date }} 起)
+                        {% elif end_date %}
+                            (至 {{ end_date }})
+                        {% else %}
+                            (過去七天)
+                        {% endif %}
+                    </span>
+                </h4>
                 <div style="height: 280px; position: relative;">
                     <canvas id="historyChart"></canvas>
                 </div>
@@ -60,7 +101,22 @@
                                     {% if is_balanced %}
                                         <span class="badge bg-success rounded-pill px-3 py-2 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i>完美均衡</span>
                                     {% else %}
-                                        <span class="badge bg-warning bg-opacity-10 text-warning-emphasis rounded-pill px-3 py-2"><i class="bi bi-exclamation-circle me-1"></i>尚未達標</span>
+                                        {% set reasons = [] %}
+                                        {% if row['proteins'] < target_proteins * 0.8 %}
+                                            {% set diff = (target_proteins - row['proteins']) | round(1) %}
+                                            {% set reasons = reasons + ['🥩 蛋白質 (缺 ' ~ diff ~ ' 份)'] %}
+                                        {% endif %}
+                                        {% if row['carbs'] < target_carbs * 0.8 %}
+                                            {% set diff = (target_carbs - row['carbs']) | round(1) %}
+                                            {% set reasons = reasons + ['🍠 澱粉 (缺 ' ~ diff ~ ' 份)'] %}
+                                        {% endif %}
+                                        {% if row['veggies'] < target_veggies * 0.8 %}
+                                            {% set diff = (target_veggies - row['veggies']) | round(1) %}
+                                            {% set reasons = reasons + ['🥦 蔬果 (缺 ' ~ diff ~ ' 份)'] %}
+                                        {% endif %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning-emphasis rounded-pill px-3 py-2" style="cursor: help;" data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="未達標項目：{{ reasons | join('、') }}<br><br>【判定邏輯】蛋白質、澱粉或蔬果份數任一項低於每日目標的 80% 即為尚未達標。">
+                                            <i class="bi bi-exclamation-circle me-1"></i>尚未達標<i class="bi bi-question-circle ms-1" style="font-size: 0.75rem; opacity: 0.85;"></i>
+                                        </span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -88,19 +144,39 @@
                 <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3 floating-icon" style="width: 60px; height: 60px;">
                     <i class="bi bi-award-fill text-success fs-2"></i>
                 </div>
-                <h5 class="fw-bold mb-3">過去七天成就統計</h5>
+                <h5 class="fw-bold mb-3">
+                    {% if start_date or end_date %}
+                        指定區間成就統計
+                    {% else %}
+                        過去七天成就統計
+                    {% endif %}
+                </h5>
                 
                 <div class="row g-3">
                     <div class="col-6">
-                        <div class="bg-white bg-opacity-55 p-3 rounded-4 border border-light">
-                            <h3 class="fw-bold text-success mb-0 font-monospace">{{ healthy_days.value }}</h3>
-                            <small class="text-muted fw-semibold">完美均衡天數</small>
+                        <div class="bg-white bg-opacity-55 p-3 rounded-4 border border-light d-flex flex-column justify-content-between align-items-center" style="min-height: 125px;">
+                            <div class="mb-1">
+                                {% if healthy_days.value > 0 %}
+                                    <i class="bi bi-award-fill fs-3" style="color: #FFD700; filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));" title="恭喜達成完美均衡！"></i>
+                                {% else %}
+                                    <i class="bi bi-award-fill text-secondary opacity-40 fs-3" title="尚未達成任何完美均衡天數"></i>
+                                {% endif %}
+                            </div>
+                            <h2 class="fw-bold text-success mb-1 font-monospace" style="font-size: 2.1rem; font-weight: 800; line-height: 1.1;">
+                                {{ healthy_days.value }}<span class="fs-6 fw-semibold text-muted ms-1">天</span>
+                            </h2>
+                            <small class="text-muted fw-semibold" style="font-size: 0.8rem;">完美均衡天數</small>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="bg-white bg-opacity-55 p-3 rounded-4 border border-light">
-                            <h3 class="fw-bold text-primary mb-0 font-monospace">{{ total_clean_score.value }}</h3>
-                            <small class="text-muted fw-semibold">原型飲食總分</small>
+                        <div class="bg-white bg-opacity-55 p-3 rounded-4 border border-light d-flex flex-column justify-content-between align-items-center" style="min-height: 125px;">
+                            <div class="mb-1">
+                                <i class="bi bi-stars text-primary fs-3" style="filter: drop-shadow(0 2px 4px rgba(13, 110, 253, 0.2));" title="原型食物獎勵積分"></i>
+                            </div>
+                            <h2 class="fw-bold text-primary mb-1 font-monospace" style="font-size: 2.1rem; font-weight: 800; line-height: 1.1;">
+                                {{ total_clean_score.value }}<span class="fs-6 fw-semibold text-muted ms-1">分</span>
+                            </h2>
+                            <small class="text-muted fw-semibold" style="font-size: 0.8rem;">原型飲食總分</small>
                         </div>
                     </div>
                 </div>
@@ -130,6 +206,11 @@
         </div>
     </div>
 </div>
+
+<!-- Floating Action Button (FAB) for quick recording -->
+<a href="{{ url_for('index') }}" class="btn btn-success rounded-circle shadow-lg d-flex align-items-center justify-content-center floating-add-btn" style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; z-index: 1030; transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s ease; border: 2px solid rgba(255,255,255,0.4);" onmouseover="this.style.transform='scale(1.15) rotate(90deg)'" onmouseout="this.style.transform='scale(1) rotate(0deg)'" title="快速去新增飲食紀錄">
+    <i class="bi bi-plus-lg fs-2 text-white"></i>
+</a>
 {% endblock %}
 
 {% block scripts %}
@@ -192,6 +273,7 @@
                     },
                     y: {
                         stacked: true,
+                        suggestedMax: {{ target_proteins + target_carbs + target_veggies }},
                         grid: { color: 'rgba(0,0,0,0.05)' },
                         ticks: {
                             font: { family: "'Outfit', sans-serif" }
@@ -213,6 +295,8 @@
                         }
                     },
                     tooltip: {
+                        mode: 'index',
+                        intersect: false,
                         callbacks: {
                             label: function(context) {
                                 return ` ${context.dataset.label}: ${context.raw} 份`;
@@ -220,8 +304,36 @@
                         }
                     }
                 }
-            }
+            },
+            plugins: [{
+                id: 'targetLine',
+                afterDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    const yScale = chart.scales.y;
+                    const targetValue = {{ target_proteins + target_carbs + target_veggies }};
+                    const yPos = yScale.getPixelForValue(targetValue);
+                    
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.setLineDash([5, 5]);
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = '#198754';
+                    ctx.moveTo(chart.chartArea.left, yPos);
+                    ctx.lineTo(chart.chartArea.right, yPos);
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#198754';
+                    ctx.font = "600 11px 'Outfit', 'Noto Sans TC', sans-serif";
+                    ctx.textAlign = 'right';
+                    ctx.fillText('每日目標參考線: ' + targetValue + ' 份', chart.chartArea.right - 10, yPos - 6);
+                    ctx.restore();
+                }
+            }]
         });
+
+        // Initialize Bootstrap tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     });
 </script>
 {% endif %}

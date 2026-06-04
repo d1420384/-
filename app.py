@@ -109,23 +109,46 @@ def index():
 @app.route('/history')
 @login_required
 def history():
+    start_date = request.args.get('start_date', '').strip()
+    end_date = request.args.get('end_date', '').strip()
+    
     conn = get_db_connection()
-    # Get the last 7 days of records
-    records = conn.execute(
-        'SELECT date, proteins, carbs, veggies, clean_score FROM records WHERE user_id = ? ORDER BY date DESC LIMIT 7',
-        (current_user.id,)
-    ).fetchall()
+    
+    if start_date and end_date:
+        records = conn.execute(
+            'SELECT date, proteins, carbs, veggies, clean_score FROM records WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date DESC',
+            (current_user.id, start_date, end_date)
+        ).fetchall()
+    elif start_date:
+        records = conn.execute(
+            'SELECT date, proteins, carbs, veggies, clean_score FROM records WHERE user_id = ? AND date >= ? ORDER BY date DESC',
+            (current_user.id, start_date)
+        ).fetchall()
+    elif end_date:
+        records = conn.execute(
+            'SELECT date, proteins, carbs, veggies, clean_score FROM records WHERE user_id = ? AND date <= ? ORDER BY date DESC',
+            (current_user.id, end_date)
+        ).fetchall()
+    else:
+        records = conn.execute(
+            'SELECT date, proteins, carbs, veggies, clean_score FROM records WHERE user_id = ? ORDER BY date DESC LIMIT 7',
+            (current_user.id,)
+        ).fetchall()
+        
     user = conn.execute(
         'SELECT target_proteins, target_carbs, target_veggies FROM users WHERE id = ?',
         (current_user.id,)
     ).fetchone()
     conn.close()
+    
     return render_template(
         'history.html', 
         records=records,
         target_proteins=user['target_proteins'] if user else 3.0,
         target_carbs=user['target_carbs'] if user else 2.0,
-        target_veggies=user['target_veggies'] if user else 5.0
+        target_veggies=user['target_veggies'] if user else 5.0,
+        start_date=start_date,
+        end_date=end_date
     )
 
 @app.route('/register', methods=('GET', 'POST'))
