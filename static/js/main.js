@@ -1,4 +1,13 @@
 let nutritionChart = null;
+let currentChartType = localStorage.getItem('preferredChartType') || 'doughnut';
+let currentStats = {
+    proteins: 0,
+    carbs: 0,
+    veggies: 0,
+    target_proteins: 3.0,
+    target_carbs: 2.0,
+    target_veggies: 5.0
+};
 
 // 食物營養類別自動偵測關鍵字庫
 const FOOD_KEYWORDS = {
@@ -41,6 +50,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Only init chart if the canvas exists (we are on the index page)
     if (document.getElementById('nutritionChart')) {
+        // Listen for chart type toggle
+        const doughnutRadio = document.getElementById('chart-doughnut');
+        const barRadio = document.getElementById('chart-bar');
+        
+        if (doughnutRadio && barRadio) {
+            // Set initial checked state based on preferred chart type
+            if (currentChartType === 'bar') {
+                barRadio.checked = true;
+            } else {
+                doughnutRadio.checked = true;
+            }
+
+            doughnutRadio.addEventListener('change', () => {
+                if (doughnutRadio.checked) {
+                    currentChartType = 'doughnut';
+                    localStorage.setItem('preferredChartType', 'doughnut');
+                    renderChart();
+                }
+            });
+            
+            barRadio.addEventListener('change', () => {
+                if (barRadio.checked) {
+                    currentChartType = 'bar';
+                    localStorage.setItem('preferredChartType', 'bar');
+                    renderChart();
+                }
+            });
+        }
+        
         initChart();
         fetchTodayStats();
     }
@@ -207,55 +245,158 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initChart() {
-    const ctx = document.getElementById('nutritionChart').getContext('2d');
+    renderChart();
+}
+
+function renderChart() {
+    const canvas = document.getElementById('nutritionChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     
-    // Initial empty chart
-    nutritionChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['蛋白質', '澱粉', '蔬果'],
-            datasets: [{
-                data: [0, 0, 0],
-                backgroundColor: [
-                    '#E07A5F', // Protein (Terracotta)
-                    '#F2CC8F', // Carbs (Warm Yellow)
-                    '#81B29A'  // Veggies (Sage Green)
-                ],
-                borderWidth: 0,
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '76%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        font: {
-                            size: 13,
-                            family: "'Outfit', 'Noto Sans TC', sans-serif",
-                            weight: '600'
-                        },
-                        usePointStyle: true,
-                        pointStyle: 'circle'
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            // If it's the grey placeholder, display 0
-                            const isPlaceholder = nutritionChart.data.datasets[0].backgroundColor[0] === '#e2e8f0';
-                            const val = isPlaceholder ? 0 : context.raw;
-                            return ` ${context.label}: ${val} 份`;
+    if (nutritionChart) {
+        nutritionChart.destroy();
+    }
+    
+    const centerText = document.getElementById('chart-center-text');
+    
+    if (currentChartType === 'doughnut') {
+        if (centerText) centerText.style.display = 'flex';
+        
+        let dataVals = [currentStats.proteins, currentStats.carbs, currentStats.veggies];
+        let bgColors = ['#E07A5F', '#D4A373', '#81B29A'];
+        const isZero = currentStats.proteins === 0 && currentStats.carbs === 0 && currentStats.veggies === 0;
+        
+        if (isZero) {
+            dataVals = [1, 1, 1];
+            bgColors = ['#e2e8f0', '#e2e8f0', '#e2e8f0'];
+        }
+        
+        nutritionChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['蛋白質', '澱粉', '蔬果'],
+                datasets: [{
+                    data: dataVals,
+                    backgroundColor: bgColors,
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '76%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 13,
+                                family: "'Outfit', 'Noto Sans TC', sans-serif",
+                                weight: '600'
+                            },
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const val = isZero ? 0 : context.raw;
+                                const total = isZero ? 0 : (currentStats.proteins + currentStats.carbs + currentStats.veggies);
+                                const pct = (isZero || total === 0) ? '0.0' : ((val / total) * 100).toFixed(1);
+                                return ` ${context.label}: ${val} 份 (${pct}%)`;
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    } else {
+        // Bar Chart mode
+        if (centerText) centerText.style.display = 'none';
+        
+        nutritionChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['蛋白質', '澱粉', '蔬果'],
+                datasets: [
+                    {
+                        label: '已攝取 (份)',
+                        data: [currentStats.proteins, currentStats.carbs, currentStats.veggies],
+                        backgroundColor: ['#E07A5F', '#D4A373', '#81B29A'],
+                        borderRadius: 6,
+                        borderWidth: 0,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.7
+                    },
+                    {
+                        label: '每日目標 (份)',
+                        data: [currentStats.target_proteins, currentStats.target_carbs, currentStats.target_veggies],
+                        backgroundColor: ['rgba(224, 122, 95, 0.15)', 'rgba(212, 163, 115, 0.15)', 'rgba(129, 178, 154, 0.15)'],
+                        borderColor: ['#E07A5F', '#D4A373', '#81B29A'],
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.7
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12,
+                                family: "'Outfit', 'Noto Sans TC', sans-serif",
+                                weight: '600'
+                            },
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.dataset.label}: ${context.raw.toFixed(1)} 份`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 12,
+                                family: "'Outfit', 'Noto Sans TC', sans-serif",
+                                weight: '600'
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11,
+                                family: "'Outfit', 'Noto Sans TC', sans-serif"
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 }
 
 function fetchTodayStats() {
@@ -312,6 +453,14 @@ function addNutrient(type, amount, cleanBonus = 0) {
 }
 
 function updateUI(proteins, carbs, veggies, cleanScore, tp, tc, tv) {
+    // Save to global stats
+    currentStats.proteins = proteins;
+    currentStats.carbs = carbs;
+    currentStats.veggies = veggies;
+    currentStats.target_proteins = tp;
+    currentStats.target_carbs = tc;
+    currentStats.target_veggies = tv;
+
     // Update raw labels
     document.getElementById('val-proteins').innerText = proteins;
     document.getElementById('val-carbs').innerText = carbs;
@@ -348,19 +497,8 @@ function updateUI(proteins, carbs, veggies, cleanScore, tp, tc, tv) {
     const totalServings = proteins + carbs + veggies;
     document.getElementById('val-total-servings').innerText = totalServings.toFixed(1);
 
-    // Update chart
-    if (nutritionChart) {
-        if (proteins === 0 && carbs === 0 && veggies === 0) {
-            // Show placeholder grey chart
-            nutritionChart.data.datasets[0].data = [1, 1, 1];
-            nutritionChart.data.datasets[0].backgroundColor = ['#e2e8f0', '#e2e8f0', '#e2e8f0'];
-        } else {
-            // Show actual nutrient chart
-            nutritionChart.data.datasets[0].data = [proteins, carbs, veggies];
-            nutritionChart.data.datasets[0].backgroundColor = ['#E07A5F', '#F2CC8F', '#81B29A'];
-        }
-        nutritionChart.update();
-    }
+    // Render/update chart
+    renderChart();
 }
 
 function submitCustomFood() {
