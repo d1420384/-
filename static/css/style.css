@@ -186,3 +186,111 @@ body {
     box-shadow: 0 0 0 3px rgba(129, 178, 154, 0.2);
     outline: none;
 }
+
+/* Auth Form Styling & Validation Effects */
+.auth-input-group {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1.5px solid #E2E8F0;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+}
+
+.auth-input-group:focus-within {
+    border-color: #81B29A;
+    box-shadow: 0 0 0 3px rgba(129, 178, 154, 0.2);
+}
+
+.auth-input-group .form-control {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.auth-input-group .input-group-text {
+    border: none;
+    background: transparent;
+    color: #A0AEC0;
+}
+
+.auth-input-group.is-valid-group {
+    border-color: #2e7d32 !important;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15) !important;
+}
+
+.auth-input-group.is-invalid-group {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
+}
+
+/* Password Strength Indicator */
+.password-strength-container {
+    margin-top: 8px;
+}
+
+.password-strength-bar {
+    height: 6px;
+    border-radius: 3px;
+    background-color: #e2e8f0;
+    width: 100%;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.password-strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 3px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.password-strength-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+    transition: color 0.3s ease;
+}
+
+.strength-weak { background-color: #dc3545; width: 33.33%; }
+.strength-medium { background-color: #ffc107; width: 66.66%; }
+.strength-strong { background-color: #2e7d32; width: 100%; }
+
+.text-strength-weak { color: #dc3545; }
+.text-strength-medium { color: #d39e00; }
+.text-strength-strong { color: #2e7d32; }
+
+/* Password visibility toggle button */
+.password-toggle-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #718096;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+    color: #2e7d32;
+}
+
+/* Custom error message styling */
+.validation-message {
+    font-size: 0.8rem;
+    margin-top: 4px;
+    display: none;
+    font-weight: 500;
+}
+
+.validation-message.invalid {
+    color: #dc3545;
+    display: block;
+}
+
+.validation-message.valid {
+    color: #2e7d32;
+    display: block;
+}
