@@ -15,20 +15,42 @@
                     <p class="text-muted">加入我們，開始您的健康飲食旅程！</p>
                 </div>
                 
-                <form method="POST" action="{{ url_for('register') }}">
+                <form id="register-form" method="POST" action="{{ url_for('register') }}" novalidate>
                     <div class="mb-3">
                         <label for="username" class="form-label fw-semibold">帳號</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
-                            <input type="text" class="form-control border-start-0 ps-0" id="username" name="username" required placeholder="請設定帳號名稱">
+                        <div class="input-group auth-input-group" id="username-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control ps-0" id="username" name="username" required placeholder="4-15位英文或數字帳號" autocomplete="username">
                         </div>
+                        <div class="validation-message" id="username-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label fw-semibold">密碼</label>
+                        <div class="input-group auth-input-group" id="password-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control ps-0" id="password" name="password" required placeholder="請設定 4-20 位密碼" autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" tabindex="-1" onclick="togglePasswordVisibility('password', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength-container">
+                            <div class="password-strength-bar">
+                                <div class="password-strength-fill" id="strength-fill"></div>
+                            </div>
+                            <span class="password-strength-text text-muted" id="strength-text">密碼強度：尚未輸入</span>
+                        </div>
+                        <div class="validation-message" id="password-feedback"></div>
                     </div>
                     <div class="mb-4">
-                        <label for="password" class="form-label fw-semibold">密碼</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock"></i></span>
-                            <input type="password" class="form-control border-start-0 ps-0" id="password" name="password" required placeholder="請設定密碼">
+                        <label for="confirm-password" class="form-label fw-semibold">確認密碼</label>
+                        <div class="input-group auth-input-group" id="confirm-password-group">
+                            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                            <input type="password" class="form-control ps-0" id="confirm-password" required placeholder="請再次輸入密碼" autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" tabindex="-1" onclick="togglePasswordVisibility('confirm-password', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
                         </div>
+                        <div class="validation-message" id="confirm-password-feedback"></div>
                     </div>
                     <button type="submit" class="btn btn-success w-100 py-2 fw-bold rounded-pill shadow-sm mb-3">立即註冊</button>
                     <div class="text-center">
@@ -39,4 +61,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 {% endblock %}

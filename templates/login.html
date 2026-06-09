@@ -15,20 +15,25 @@
                     <p class="text-muted">歡迎回來，繼續記錄您的健康飲食！</p>
                 </div>
                 
-                <form method="POST" action="{{ url_for('login') }}">
+                <form id="login-form" method="POST" action="{{ url_for('login') }}" novalidate>
                     <div class="mb-3">
                         <label for="username" class="form-label fw-semibold">帳號</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
-                            <input type="text" class="form-control border-start-0 ps-0" id="username" name="username" required placeholder="請輸入帳號">
+                        <div class="input-group auth-input-group" id="username-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control ps-0" id="username" name="username" required placeholder="請輸入帳號" autocomplete="username">
                         </div>
+                        <div class="validation-message" id="username-feedback"></div>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label fw-semibold">密碼</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock"></i></span>
-                            <input type="password" class="form-control border-start-0 ps-0" id="password" name="password" required placeholder="請輸入密碼">
+                        <div class="input-group auth-input-group" id="password-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control ps-0" id="password" name="password" required placeholder="請輸入密碼" autocomplete="current-password">
+                            <button type="button" class="password-toggle-btn" tabindex="-1" onclick="togglePasswordVisibility('password', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
                         </div>
+                        <div class="validation-message" id="password-feedback"></div>
                     </div>
                     <div class="mb-4 d-flex justify-content-between align-items-center">
                         <div class="form-check">
@@ -45,4 +50,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 {% endblock %}
